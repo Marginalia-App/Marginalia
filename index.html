@@ -31,21 +31,12 @@ body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--b
 textarea{width:100%;height:100%;background:transparent;color:var(--text);border:none;outline:none;padding:12px;resize:none}
 details{margin:8px;border:1px solid #555;padding:6px} pre{white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;margin:0}
 .hidden{display:none!important}
+#thesaurusPopup{position:fixed;display:none;background:var(--panel);border:1px solid #666;padding:8px;max-width:320px;max-height:60vh;overflow-y:auto;z-index:10000}
+#thesaurusPopup div{padding:4px;cursor:pointer;word-break:break-word}
+#thesaurusPopup div:hover{background:rgba(255,255,255,.08)}
 button,select,input{padding:4px}
 </style>
-function newProject(){
- if(confirm("Start a new project?")){
-   localStorage.clear();
-   location.reload();
- }
-}
- function toggleFullscreen(){
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
-}
+
 <title>Marginalia</title>
 <meta name="theme-color" content="#1e1f22">
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,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">
@@ -64,6 +55,329 @@ function newProject(){
 </div>
 
 <div id="app">
+<div id="toolbar"><button id="installBtn">Install</button><button id="fullscreenBtn">Fullscreen</button>
+<div class="group"><b>Structure</b><button onclick="insertText('# Chapter Title\n\n')">Chapter</button><button onclick="insertText('\n<div style=&quot;page-break-after:always;&quot;></div>\n')">Page Break</button></div>
+<div class="group"><b>Formatting</b><button onclick="wrap('**','**')">B</button><button onclick="wrap('*','*')">I</button><button onclick="alignWrap('left')">L</button><button onclick="alignWrap('center')">C</button><button onclick="alignWrap('right')">R</button></div>
+<div class="group"><b>Workspace</b><button onclick="focusMode()">Focus</button></div>
+<div class="group"><b>Project</b><button onclick="importCards()">Import Cards</button><button onclick="importMD()">Import MD</button><button onclick="exportMD()">Export MD</button><button onclick="importProject()">Import Project</button><button onclick="exportProject()">Export Project</button></div>
+<div class="group"><b>Theme</b><select id="theme" onchange="setTheme(this.value)"><option>Dark Draft</option><option>Paper Draft</option><option>Manuscript</option><option>E-Ink</option></select></div>
+<div class="group"><b>Help</b><button onclick="showFAQ()">F.A.Q.</button></div>
+</div>
+
+<div id="main">
+<div id="left"><div id="cards"></div></div>
+<div id="divider"></div>
+<div id="right"><textarea id="draft" spellcheck="true" lang="en" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea></div>
+</div>
+
+<div id="status">
+Daily Goal: <input id="goal" value="1000" size="5">
+ | Session: <span id="session">0</span>
+ | Goal Completion: <span id="completion">0%</span>
+ | Total Words: <span id="total">0</span>
+</div>
+</div>
+
+<div id="thesaurusPopup"></div><div id="faqModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:20000;display:flex;align-items:center;justify-content:center;"><div style="background:var(--panel);color:var(--text);width:min(900px,90vw);max-height:80vh;overflow:auto;padding:20px;border:1px solid #666;"><h2>Marginalia - FAQ</h2><p><b>Purpose:</b> A distraction-free drafting environment designed for writers who draft from existing outlines and chapter cards.</p>
+<h3>Features</h3>
+<details><summary><b>Import Cards</b></summary><p>Import a chapter card file. Cards remain separate from your manuscript and act as reference material while drafting.</p></details>
+<details><summary><b>Import / Export MD</b></summary><p>Import an existing markdown manuscript or export your current draft as a .md file for Word, Atticus, or other writing software.</p></details>
+<details><summary><b>Import / Export Project</b></summary><p>Project files save and restore your manuscript, cards, theme, and workspace settings.</p></details>
+<details><summary><b>Focus Mode</b></summary><p>Hide the outline pane and write with fewer distractions.</p></details>
+<details><summary><b>Autosave & Restore</b></summary><p>Your work is automatically saved locally and restored when reopening the application.</p></details>
+
+<details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, and E-Ink modes.</p></details>
+<details>
+<summary><b>Formatting & Markdown</b></summary>
+<p>
+Marginalia uses simple Markdown formatting because it is lightweight, reliable, and supported by most modern writing tools.
+</p>
+<ul>
+<li><b>Chapter</b> inserts a Markdown chapter heading.</li>
+<li><b>Page Break</b> inserts a page break marker for export.</li>
+<li><b>B</b> wraps selected text in <code>**bold**</code>.</li>
+<li><b>I</b> wraps selected text in <code>*italic*</code>.</li>
+<li><b>L</b>, <b>C</b>, and <b>R</b> wrap selected text with alignment tags.</li>
+</ul>
+<p>
+Do not worry about seeing Markdown symbols while drafting. They are intended for the writing process and can be interpreted by many publishing and formatting tools.
+</p>
+<p>
+When importing your manuscript into applications such as Microsoft Word, Atticus, or other compatible writing software, formatting can be converted into properly formatted headings, italics, bold text, and page breaks as part of your publishing workflow.
+</p>
+<p>
+The goal is to keep drafting fast and distraction-free while preserving structure for later formatting.
+</p>
+</details>
+
+<h3>Support</h3><p>For updates, support, feedback, or bug reports:</p><p><b>Website:</b> <a href="https://jvmolenaar.com" target="_blank">https://jvmolenaar.com</a><br><b>Email:</b> <a href="mailto:Author@JVMolenaar.com">Author@JVMolenaar.com</a></p><h3>License & Distribution</h3><p>Marginalia is currently distributed free of charge by author J. V. Molenaar. If someone attempts to sell you this version of the application, please contact the author and/or report the unauthorized seller. Official updates and releases can be found through the website listed above.</p><h3>Disclaimer</h3><p>This software is provided &quot;as is&quot; without warranty of any kind, express or implied. By using Marginalia, you acknowledge that you do so at your own risk. The author shall not be liable for any loss of data, loss of work, system issues, damages, or other consequences resulting from the use or misuse of this application. Users are strongly encouraged to maintain regular backups of all writing projects and manuscripts.</p><div style="text-align:right;"><button onclick="closeFAQ()">Close</button></div></div></div>
+
+<input id="cardsFile" type="file" hidden>
+<input id="mdFile" type="file" hidden>
+<input id="projectFile" type="file" hidden>
+
+<script>
+const quotes=[
+'"How many good books suffer neglect through the inefficiency of their beginnings!"<br><br>— Edgar Allan Poe',
+'"A book must be the axe for the frozen sea within us."<br><br>— Franz Kafka',
+'"You must stay drunk on writing so reality cannot destroy you."<br><br>— Ray Bradbury',
+'"The story is not all told."<br><br>— Ursula K. Le Guin'
+];
+quote.innerHTML=quotes[Math.floor(Math.random()*quotes.length)];
+setTimeout(()=>{splash.style.display='none';app.style.display='flex';},3000);
+
+let synonymDB={
+corridor:["passage","gallery","hallway","concourse","arcade","aisle","walkway"],
+strange:["uncanny","anomalous","peculiar","aberrant","bizarre","incongruous","odd"],
+dark:["shadowed","murky","dim","gloomy","lightless","tenebrous","obscure"],
+warmth:["heat","glow","radiance","comfort","temperature","warmness"],
+silence:["stillness","hush","quietude","muteness","soundlessness","calm"],
+fear:["dread","terror","apprehension","anxiety","alarm","trepidation"],
+door:["portal","gateway","entrance","threshold","access","opening"],
+house:["dwelling","residence","home","abode","structure","building"],
+light:["illumination","radiance","glow","luminescence","brightness"],
+cold:["frigid","chilly","icy","frosty","wintry","cool"],sleep:["slumber","doze","nap","rest","repose","dormancy","dream"],room:["chamber","space","quarters","area","interior"],window:["opening","pane","casement","aperture"],walk:["stroll","pace","wander","stride","saunter"],look:["glance","gaze","peer","stare","observe"],think:["ponder","consider","reflect","contemplate","ruminate"],quiet:["silent","hushed","still","muted","peaceful"],sleep:["slumber","doze","nap","rest","repose","dream"],
+whisper:["murmur","hiss","susurration","mutter","undertone"],
+exhausted:["drained","weary","fatigued","spent","depleted","worn-out"],
+vanished:["disappeared","faded","evaporated","departed","dissolved"],
+trembling:["shaking","quivering","shuddering","tremoring","vibrating"],
+investigate:["examine","inspect","probe","explore","scrutinize"],
+walk:["stroll","stride","saunter","wander","pace"],
+run:["sprint","dash","race","hurry","charge"],
+look:["gaze","peer","glance","observe","study"],
+think:["ponder","consider","reflect","contemplate","ruminate"],
+room:["chamber","quarters","space","interior","area"],
+window:["pane","casement","aperture","opening"],
+hallway:["corridor","passage","gallery","concourse"],
+house:["home","dwelling","residence","abode","structure"],
+fearful:["afraid","anxious","apprehensive","alarmed","terrified"],
+shadow:["shade","darkness","silhouette","gloom","obscurity"],
+old:["ancient","aged","weathered","antique","elderly"],
+struggle:["battle","grapple","contend","strive","labor"],
+strange:["uncanny","peculiar","anomalous","bizarre","odd"],
+silence:["hush","stillness","quietude","muteness","calm"]
+};
+
+let cardsData=[];
+let sessionStart=0;
+
+function updateStats(){
+ let totalWords=(draft.value.match(/\S+/g)||[]).length;
+ let sessionWords=Math.max(0,totalWords-sessionStart);
+ total.textContent=totalWords;
+ session.textContent=sessionWords;
+ completion.textContent=Math.round((sessionWords/Math.max(1,parseInt(goal.value||1000)))*100)+'%';
+}
+draft.oninput=updateStats;
+goal.oninput=updateStats;
+
+function renderCards(){
+ cards.innerHTML='';
+ cardsData.forEach(c=>{
+  let d=document.createElement('details');
+  d.innerHTML='<summary>'+c.title+'</summary><pre>'+c.notes+'</pre>';
+  cards.appendChild(d);
+ });
+}
+
+function importCards(){
+ cardsFile.onchange=e=>{
+  let r=new FileReader();
+  r.onload=x=>{
+   cardsData=[];
+   x.target.result.split(/^# /m).filter(Boolean).forEach(ch=>{
+    let lines=ch.split('\n');
+    cardsData.push({title:lines[0].trim(),notes:lines.slice(1).join('\n').trim()});
+   });
+   renderCards();
+  };
+  r.readAsText(e.target.files[0]);
+ };
+ cardsFile.click();
+}
+
+function importMD(){
+ mdFile.onchange=e=>{
+  let r=new FileReader();
+  r.onload=x=>{
+   draft.value=x.target.result;
+   sessionStart=(draft.value.match(/\S+/g)||[]).length;
+   updateStats();
+  };
+  r.readAsText(e.target.files[0]);
+ };
+ mdFile.click();
+}
+
+function exportMD(){
+ let a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([draft.value]));
+ a.download='manuscript.md';a.click();
+}
+
+function exportProject(){
+ let data={cards:cardsData,draft:draft.value,goal:goal.value,theme:theme.value};
+ let a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)]));
+ a.download='Marginalia_Project.json';a.click();
+}
+
+function importProject(){
+ projectFile.onchange=e=>{
+  let r=new FileReader();
+  r.onload=x=>{
+   let d=JSON.parse(x.target.result);
+   cardsData=d.cards||[];
+   draft.value=d.draft||'';
+   goal.value=d.goal||1000;
+   theme.value=d.theme||'Dark Draft';
+   sessionStart=(draft.value.match(/\S+/g)||[]).length;
+   setTheme(theme.value);
+   renderCards();
+   updateStats();
+  };
+  r.readAsText(e.target.files[0]);
+ };
+ projectFile.click();
+}
+
+function thesaurus(){return;
+ const s=draft.selectionStart,e=draft.selectionEnd;
+ const word=draft.value.substring(s,e).trim().toLowerCase().replace(/^[^a-z]+|[^a-z]+$/g,'');
+ if(!word)return;
+ const popup=document.getElementById('thesaurusPopup');
+ popup.innerHTML='<b>'+word+'</b><hr>';
+ const list=synonymDB[word]||[];
+ if(!list.length){popup.innerHTML+='<div>No synonyms found</div>';}
+ list.forEach(w=>{
+   let d=document.createElement('div');
+   d.textContent=w;
+   d.onclick=()=>{
+      draft.setRangeText(w,s,e,'end');
+      popup.style.display='none';
+      updateStats();
+   };
+   popup.appendChild(d);
+ });
+ popup.style.left='120px';
+ popup.style.top='120px';
+ popup.style.display='block';
+}
+document.addEventListener('click',e=>{
+ if(!e.target.closest('#thesaurusPopup') && e.target.textContent!=='Thesaurus')
+  thesaurusPopup.style.display='none';
+});
+
+
+function showFAQ(){
+ const m=document.getElementById('faqModal');
+ m.classList.remove('hidden');
+}
+function closeFAQ(){
+ const m=document.getElementById('faqModal');
+ m.classList.add('hidden');
+}
+
+function focusMode(){left.classList.toggle('hidden');divider.classList.toggle('hidden');}
+function insertText(t){draft.setRangeText(t,draft.selectionStart,draft.selectionEnd,'end');updateStats();}
+function wrap(a,b){let s=draft.selectionStart,e=draft.selectionEnd,t=draft.value.substring(s,e);draft.setRangeText(a+t+b,s,e,'end');updateStats();}
+function alignWrap(dir){let s=draft.selectionStart,e=draft.selectionEnd,t=draft.value.substring(s,e);draft.setRangeText('<p align="'+dir+'">'+t+'</p>',s,e,'end');updateStats();}
+
+function setTheme(n){
+ const r=document.documentElement.style;
+ if(n==='Dark Draft'){r.setProperty('--bg','#1e1f22');r.setProperty('--panel','#2a2c31');r.setProperty('--text','#e6e6e6');r.setProperty('--accent','#c9a86a');}
+ if(n==='Paper Draft'){r.setProperty('--bg','#f4ecd8');r.setProperty('--panel','#efe4ca');r.setProperty('--text','#222');r.setProperty('--accent','#8b6f47');}
+ if(n==='Manuscript'){r.setProperty('--bg','#fff');r.setProperty('--panel','#eee');r.setProperty('--text','#000');r.setProperty('--accent','#666');}
+ if(n==='E-Ink'){r.setProperty('--bg','#fff');r.setProperty('--panel','#fff');r.setProperty('--text','#000');r.setProperty('--accent','#000');}
+}
+
+synonymDB.sleep=["slumber","doze","nap","rest","repose","dream"];
+synonymDB.writer=["author","novelist","wordsmith","storyteller","scribe"];
+synonymDB.book=["novel","volume","manuscript","publication","work"];
+synonymDB.story=["tale","narrative","account","chronicle","plot"];
+synonymDB.character=["figure","persona","individual","protagonist"];
+synonymDB.house=["home","dwelling","residence","abode","structure"];
+synonymDB.room=["chamber","quarters","space","interior"];
+synonymDB.window=["pane","casement","opening","aperture"];
+synonymDB.door=["portal","gateway","entrance","threshold"];
+synonymDB.light=["glow","radiance","illumination","brightness"];
+synonymDB.dark=["gloomy","shadowed","murky","dim"];
+synonymDB.fear=["dread","terror","anxiety","apprehension"];
+synonymDB.whisper=["murmur","mutter","hiss","undertone"];
+synonymDB.look=["gaze","peer","observe","glance"];
+synonymDB.think=["ponder","consider","reflect","contemplate"];
+synonymDB.walk=["stroll","stride","wander","pace"];
+synonymDB.run=["sprint","dash","race","charge"];
+synonymDB.old=["aged","ancient","weathered","antique"];
+synonymDB.strange=["uncanny","peculiar","bizarre","anomalous"];
+synonymDB.silence=["hush","stillness","quietude","calm"];
+
+
+synonymDB = {};
+
+try{
+const AUTOSAVE_KEY='marginalia_autosave';
+if(typeof draft!=='undefined'){
+ const saved=localStorage.getItem(AUTOSAVE_KEY);
+ if(saved && !draft.value){draft.value=saved; if(typeof updateStats==='function') updateStats();}
+ draft.addEventListener('input',()=>localStorage.setItem(AUTOSAVE_KEY,draft.value));
+}
+}catch(e){console.log(e);}
+
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js");
+  });
+}
+</script>
+
+<script>
+window.addEventListener('beforeunload', function (e) {
+  e.preventDefault();
+  e.returnValue = '';
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const fsBtn = document.getElementById('fullscreenBtn');
+  if (fsBtn) {
+    fsBtn.addEventListener('click', async () => {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    });
+  }
+
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'inline-block';
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+      } else {
+        alert('iPhone: Share → Add to Home Screen\n\nAndroid: Menu → Install App');
+      }
+    });
+  }
+});
+</script>
+
+</body>
+</html><div id="app">
 <div id="toolbar">
 
 <div class="group">
