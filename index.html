@@ -2,6 +2,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+ <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e1f22">
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js");
+  });
+}
+</script>
 <meta charset="utf-8">
 <title>Marginalia</title>
 <style>
