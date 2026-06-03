@@ -24,6 +24,33 @@
   margin-bottom: 16px;
   filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
 }
+    /* Splash fade-in */
+#splash{
+  opacity: 0;
+  animation: splashFadeIn 900ms ease-out forwards;
+}
+
+@keyframes splashFadeIn{
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Credit line styling */
+#splashCredit{
+  margin: 8px 0 0;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+#splashCredit a{
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(201,168,106,.6);
+}
+
+#splashCredit a:hover{
+  text-decoration: underline;
+}
   :root{--bg:#1e1f22;--panel:#2a2c31;--text:#e6e6e6;--accent:#c9a86a}
   body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font-family:Georgia,serif}
   #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px;z-index:9999}
@@ -58,7 +85,14 @@
        alt="Marginalia logo">
 
   <h1>Marginalia</h1>
-  <p><em>From the margins, to the story.</em></p>
+
+  <p id="splashTagline"><em>From the margins to the story.</em></p>
+
+  <p id="splashCredit">
+    Designed and Developed by
+    <a href="https://jvmolenaar.com" target="_blank" rel="noopener">Author J. V. Molenaar</a>
+  </p>
+
   <blockquote id="quote"></blockquote>
 </div>
 <div id="app">
