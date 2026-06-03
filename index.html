@@ -182,7 +182,6 @@ const quotes=[
 '"How many good books suffer neglect through the inefficiency of their beginnings!"<br><br>— Edgar Allan Poe',
 '"A book must be the axe for the frozen sea within us."<br><br>— Franz Kafka',
 '"You must stay drunk on writing so reality cannot destroy you."<br><br>— Ray Bradbury',
-'"The story is not all told."<br><br>— Ursula K. Le Guin',
 '"The idea is to write it so that people hear it and it slides through the brain and goes straight to the heart."<br><br>— Maya Angelou',
 '"The scariest moment is always just before you start."<br><br>— Stephen King',
 '"All you have to do is write one true sentence. Write the truest sentence that you know."<br><br>— Ernest Hemingway',
@@ -371,45 +370,5 @@ function toggleFullscreen(){
 }
 </script>
 
-</body>
-</html>                free: freePanel.value,
-                timestamp: new Date().getTime()
-            };
-            
-            localStorage.setItem('marginalia_autosave', JSON.stringify(dataToSave));
-            
-            status.innerText = "All changes saved locally.";
-            status.style.color = "var(--accent)";
-        }
-
-        function triggerAutosave() {
-            // Immediate feedback
-            status.innerText = "Unsaved changes...";
-            status.style.color = "orange";
-
-            // Debounce: Wait 1 second after typing stops to write to disk
-            clearTimeout(autosaveTimer);
-            autosaveTimer = setTimeout(performSave, 1000);
-        }
-
-        // 5. NEW PROJECT LOGIC
-        btnNew.addEventListener('click', () => {
-            if (confirm("This will permanently delete the current draft. Are you sure?")) {
-                // Clear UI
-                guidedPanel.value = "";
-                freePanel.value = "";
-                // Clear Storage
-                localStorage.removeItem('marginalia_autosave');
-                // Clear status
-                status.innerText = "New project started.";
-                status.style.color = "var(--accent)";
-            }
-        });
-
-        // 6. EVENT LISTENERS
-        guidedPanel.addEventListener('input', triggerAutosave);
-        freePanel.addEventListener('input', triggerAutosave);
-
-    </script>
 </body>
 </html>
