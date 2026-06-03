@@ -17,6 +17,13 @@
   <title>Marginalia</title>
 
   <style>
+    #splashLogo{
+  width: min(120px, 30vw);
+  height: min(120px, 30vw);
+  object-fit: contain;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
+}
   :root{--bg:#1e1f22;--panel:#2a2c31;--text:#e6e6e6;--accent:#c9a86a}
   body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);font-family:Georgia,serif}
   #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px;z-index:9999}
@@ -45,11 +52,15 @@
 <body>
 
 <div id="splash">
+  <img id="splashLogo"
+       src="icon-192.png"
+       srcset="icon-192.png 1x, icon-512.png 2x"
+       alt="Marginalia logo">
+
   <h1>Marginalia</h1>
-  <p><em>From the margins to the story.</em></p>
+  <p><em>From the margins, to the story.</em></p>
   <blockquote id="quote"></blockquote>
 </div>
-
 <div id="app">
   <div id="toolbar">
 
