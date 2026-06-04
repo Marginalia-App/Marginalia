@@ -1,17 +1,27 @@
 {
+  "name": "Marginalia",
   "short_name": "Marginalia",
-  "name": "Marginalia Writing App",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/1043/1043512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "start_url": "./index.html",
+  "description": "From the margins to the story. A distraction-free drafting environment.",
+  "start_url": ".",
+  "display": "standalone",
   "background_color": "#1e1f22",
   "theme_color": "#1e1f22",
-  "display": "standalone",
-  "scope": "./"
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
 }
