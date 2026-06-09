@@ -142,13 +142,7 @@
         Page Break
       </button>
 
-      <button onclick="wrap('**','**')">B</button>
-      <button onclick="wrap('*','*')">I</button>
-
-      <button onclick="alignWrap('left')">L</button>
-      <button onclick="alignWrap('center')">C</button>
-      <button onclick="alignWrap('right')">R</button>
-    </div>
+     
 
     <div class="group">
       <details>
@@ -159,19 +153,12 @@
         <button onclick="importCards()">Import Chapter Cards</button>
         <button onclick="importMD()">Import Markdown</button>
         <button onclick="exportMD()">Export Markdown</button>
-        <button onclick="importProject()">Import Project</button>
-        <button onclick="exportProject()">Export Project</button>
 
       </details>
     </div>
 
     <div class="group">
       <button onclick="showFAQ()">F.A.Q.</button>
-    </div>
-
-    <div class="group">
-      <button id="installBtn">Install App</button>
-    </div>
 
   </div>
 
@@ -207,14 +194,6 @@
     <details>
       <summary><b>Formatting & Markdown</b></summary>
       <p>Marginalia uses simple Markdown formatting because it is lightweight, reliable, and supported by most modern writing tools.</p>
-      <ul>
-        <li><b>Chapter</b> inserts a Markdown chapter heading.</li>
-        <li><b>Page Break</b> inserts a page break marker for export.</li>
-        <li><b>B</b> wraps selected text in <code>**bold**</code>.</li>
-        <li><b>I</b> wraps selected text in <code>*italic*</code>.</li>
-        <li><b>L</b>, <b>C</b>, and <b>R</b> wrap selected text with alignment tags.</li>
-      </ul>
-      <p>Do not worry about seeing Markdown symbols while drafting.</p>
     </details>
 <p></p>Marginalia is free and always will be. If it helped you finish a chapter, start a story, or spend a little more time writing than scrolling, and you'd like to support future development, feel free to reach out to the author.
 
@@ -303,38 +282,6 @@ function exportMD(){
   a.href=URL.createObjectURL(new Blob([draft.value]));
   a.download='manuscript.md';
   a.click();
-}
-
-function exportProject(){
-  let data={cards:cardsData,draft:draft.value,goal:goal.value,theme:theme?.value};
-  let a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)]));
-  a.download='Marginalia_Project.json';
-  a.click();
-}
-
-function importProject(){
-  projectFile.onchange=e=>{
-    let r=new FileReader();
-    r.onload=x=>{
-      let d=JSON.parse(x.target.result);
-      cardsData=d.cards||[];
-      draft.value=d.draft||'';
-      goal.value=d.goal||1000;
-
-      // Your original code references theme.value; keep behavior but guard if theme control is absent.
-      if (typeof theme !== 'undefined') theme.value=d.theme||'Dark Draft';
-
-      sessionStart=(draft.value.match(/\S+/g)||[]).length;
-
-      if (typeof theme !== 'undefined') setTheme(theme.value);
-      renderCards();
-      updateStats();
-    };
-    r.readAsText(e.target.files[0]);
-  };
-  projectFile.click();
-}
 
 function showFAQ(){ faqModal.classList.remove('hidden'); }
 function closeFAQ(){ faqModal.classList.add('hidden'); }
@@ -389,26 +336,6 @@ window.addEventListener('beforeunload', function (e) {
   e.returnValue = '';
 });
 </script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.style.display = 'inline-block';
-  });
-
-  if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-      } else {
-        alert('iPhone: Share → Add to Home Screen\n\nAndroid: Menu → Install App');
-      }
-    });
   }
 });
 
