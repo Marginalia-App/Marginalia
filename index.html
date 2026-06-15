@@ -35,6 +35,16 @@
     }
 
     #splash {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px;
+      z-index: 9999;
       opacity: 0;
       animation: splashFadeIn 900ms ease-out forwards;
     }
@@ -75,19 +85,6 @@
       background: var(--bg);
       color: var(--text);
       font-family: Georgia, serif;
-    }
-
-    #splash {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 60px;
-      z-index: 9999;
     }
 
     #splash h1 {
@@ -142,7 +139,6 @@
     #divider {
       width: 6px;
       background: var(--accent);
-      /* Divider is not resizable */
     }
 
     #right {
@@ -329,15 +325,10 @@ const quotes = [
   '"I write to find out what I did not know I knew."<br><br>— Robert Frost',
   '"I know nothing in the world that has as much power as a word. Sometimes I write one, and I look at it, until it begins to shine."<br><br>— Emily Dickinson'
 ];
-document.getElementById('quote').innerHTML = quotes[Math.floor(Math.random() * quotes.length)];
-
-// ---------- SPLASH SCREEN (3 seconds exactly) ----------
-setTimeout(() => {
-  if (splash && app) {
-    splash.style.display = 'none';
-    app.style.display = 'flex';
-  }
-}, 3000);
+const quoteElement = document.getElementById('quote');
+if (quoteElement) {
+  quoteElement.innerHTML = quotes[Math.floor(Math.random() * quotes.length)];
+}
 
 // ---------- WORD COUNT & STATS ----------
 function getWordCount(text) {
@@ -350,16 +341,18 @@ function updateStats() {
   const goal = parseInt(goalInput.value || 1000);
   const percent = goal > 0 ? Math.round((sessionWords / goal) * 100) : 0;
   
-  totalSpan.textContent = totalWords;
-  sessionSpan.textContent = sessionWords;
-  completionSpan.textContent = percent + '%';
+  if (totalSpan) totalSpan.textContent = totalWords;
+  if (sessionSpan) sessionSpan.textContent = sessionWords;
+  if (completionSpan) completionSpan.textContent = percent + '%';
 }
 
-draft.oninput = () => {
-  draftHasChanged = true;
-  updateStats();
-};
-goalInput.oninput = updateStats;
+if (draft) {
+  draft.oninput = () => {
+    draftHasChanged = true;
+    updateStats();
+  };
+}
+if (goalInput) goalInput.oninput = updateStats;
 
 // ---------- THEME (with persistence) ----------
 function setTheme(themeName) {
@@ -406,11 +399,11 @@ function renderCards() {
     details.innerHTML = `<summary>${escapeHtml(c.title)}</summary><pre>${escapeHtml(c.notes)}</pre>`;
     cardsDiv.appendChild(details);
   });
-  // Save cards to localStorage
   localStorage.setItem('marginalia_cards', JSON.stringify(cardsData));
 }
 
 function escapeHtml(str) {
+  if (!str) return '';
   return str.replace(/[&<>]/g, function(m) {
     if (m === '&') return '&amp;';
     if (m === '<') return '&lt;';
@@ -422,6 +415,7 @@ function escapeHtml(str) {
 // ---------- IMPORT/EXPORT ----------
 function importCards() {
   const fileInput = document.getElementById('cardsFile');
+  if (!fileInput) return;
   fileInput.onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -445,6 +439,7 @@ function importCards() {
 
 function importMD() {
   const fileInput = document.getElementById('mdFile');
+  if (!fileInput) return;
   fileInput.onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -465,7 +460,7 @@ function exportMD() {
   a.href = URL.createObjectURL(new Blob([draft.value]));
   a.download = 'manuscript.md';
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => URL.revokeObjectURL(a.href), 100);
 }
 
 function exportProject() {
@@ -479,11 +474,12 @@ function exportProject() {
   a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)]));
   a.download = 'Marginalia_Project.json';
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(() => URL.revokeObjectURL(a.href), 100);
 }
 
 function importProject() {
   const fileInput = document.getElementById('projectFile');
+  if (!fileInput) return;
   fileInput.onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -542,27 +538,30 @@ function newProject() {
   }
 }
 
-// ---------- AUTOSAVE (draft + cards + goal) ----------
+// ---------- AUTOSAVE ----------
 const AUTOSAVE_DRAFT_KEY = 'marginalia_autosave_draft';
 const AUTOSAVE_GOAL_KEY = 'marginalia_autosave_goal';
 
 function saveAllToLocal() {
   try {
-    localStorage.setItem(AUTOSAVE_DRAFT_KEY, draft.value);
-    localStorage.setItem(AUTOSAVE_GOAL_KEY, goalInput.value);
-    // Cards already saved in renderCards()
+    if (draft) localStorage.setItem(AUTOSAVE_DRAFT_KEY, draft.value);
+    if (goalInput) localStorage.setItem(AUTOSAVE_GOAL_KEY, goalInput.value);
   } catch (e) { console.log(e); }
 }
 
 let autosaveTimer;
-draft.addEventListener('input', () => {
-  clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(saveAllToLocal, 600);
-});
-goalInput.addEventListener('input', () => {
-  clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(saveAllToLocal, 600);
-});
+if (draft) {
+  draft.addEventListener('input', () => {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(saveAllToLocal, 600);
+  });
+}
+if (goalInput) {
+  goalInput.addEventListener('input', () => {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(saveAllToLocal, 600);
+  });
+}
 
 function restoreFromLocal() {
   try {
@@ -570,22 +569,22 @@ function restoreFromLocal() {
     const savedGoal = localStorage.getItem(AUTOSAVE_GOAL_KEY);
     const savedCards = localStorage.getItem('marginalia_cards');
     
-    if (savedDraft && !draft.value) {
+    if (savedDraft && draft && !draft.value) {
       draft.value = savedDraft;
     }
-    if (savedGoal) {
+    if (savedGoal && goalInput) {
       goalInput.value = savedGoal;
     }
     if (savedCards) {
       cardsData = JSON.parse(savedCards);
       renderCards();
     }
-    sessionStart = getWordCount(draft.value);
+    if (draft) sessionStart = getWordCount(draft.value);
     updateStats();
   } catch (e) { console.log(e); }
 }
 
-// ---------- BEFOREUNLOAD (only if changed) ----------
+// ---------- BEFOREUNLOAD ----------
 window.addEventListener('beforeunload', (e) => {
   if (draftHasChanged) {
     e.preventDefault();
@@ -624,298 +623,17 @@ function init() {
   loadSavedTheme();
   restoreFromLocal();
   updateStats();
+  
+  // Hide splash after 3 seconds exactly
+  setTimeout(() => {
+    if (splash && app) {
+      splash.style.display = 'none';
+      app.style.display = 'flex';
+    }
+  }, 3000);
 }
 
 init();
-</script>
-
-</body>
-</html>  #right{flex:1}
-  textarea{width:100%;height:100%;background:transparent;color:var(--text);border:none;outline:none;padding:12px;resize:none}
-  details{margin:8px;border:1px solid #555;padding:6px}
-  pre{white-space:pre-wrap;overflow-wrap:break-word;word-break:break-word;margin:0}
-  .hidden{display:none!important}
-  button,select,input{padding:4px}
-     <link rel="manifest" href="manifest.json">
-  
-  <!-- Classic Favicon -->
-  <link rel="icon" href="icon-192.png" sizes="any">
-  
-  <!-- Modern SVG Favicon (if you have one, preferred by some browsers) -->
-  <!-- <link rel="icon" href="logo.svg" type="image/svg+xml"> -->
-  
-  <!-- Apple Touch Icon (for "Add to Home Screen" on iOS) -->
-  <link rel="apple-touch-icon" href="icon-192.png">
-
-  <!-- Microsoft Tile and Theme -->
-  <meta name="msapplication-TileColor" content="#1e1f22">
-  <meta name="msapplication-TileImage" content="icon-192.png">
-
-  <!-- Theme Color for browsers -->
-  <meta name="theme-color" content="#1e1f22">
-  </style>
-
-  <meta name="theme-color" content="#1e1f22">
-
-
-</head>
-
-<body>
-
-<div id="splash">
-  <img id="splashLogo"
-       src="icon-192.png"
-       srcset="icon-192.png 1x, icon-512.png 2x"
-       alt="Marginalia logo">
-
-  <h1>Marginalia</h1>
-
-  <p id="splashTagline"><em>From the margins to the story.</em></p>
-
-  <p id="splashCredit">
-    Designed and Developed by
-    <a href="https://jvmolenaar.com" target="_blank" rel="noopener">Author J. V. Molenaar</a>
-  </p>
-
-  <blockquote id="quote"></blockquote>
-</div>
-<div id="app">
-  <div id="toolbar">
-
-    <div class="group">
-      <details>
-        <summary>Workspace</summary>
-
-        <details>
-          <summary>Theme</summary>
-          <button onclick="setTheme('Dark Draft')">Dark Draft</button>
-          <button onclick="setTheme('Paper Draft')">Paper Draft</button>
-          <button onclick="setTheme('Manuscript')">Manuscript</button>
-          <button onclick="setTheme('E-Ink')">E-Ink</button>
-        </details>
-
-        <button onclick="toggleFullscreen()">Fullscreen</button>
-        <button onclick="focusMode()">Focus Mode</button>
-
-      </details>
-    </div>
-
-    <div class="group">
-      <b>Structure &amp; Formatting</b><br>
-
-      <button onclick="insertText('# Chapter Title\n\n')">Chapter</button>
-
-      <button onclick="insertText('\n<div style=&quot;page-break-after:always;&quot;></div>\n')">
-        Page Break
-      </button>
-
-     
-
-    <div class="group">
-      <details>
-        <summary>File</summary>
-
-        <button onclick="newProject()">📄 New Project</button>
-
-        <button onclick="importCards()">Import Chapter Cards</button>
-        <button onclick="importMD()">Import Markdown</button>
-        <button onclick="exportMD()">Export Markdown</button>
-
-      </details>
-    </div>
-
-    <div class="group">
-      <button onclick="showFAQ()">F.A.Q.</button>
-
-  </div>
-
-  <div id="main">
-    <div id="left"><div id="cards"></div></div>
-    <div id="divider"></div>
-    <div id="right">
-      <textarea id="draft" spellcheck="true" lang="en" autocorrect="on" autocomplete="on" autocapitalize="sentences"></textarea>
-    </div>
-  </div>
-
-  <div id="status">
-    Daily Goal: <input id="goal" value="1000" size="5">
-     | Session: <span id="session">0</span>
-     | Goal Completion: <span id="completion">0%</span>
-     | Total Words: <span id="total">0</span>
-  </div>
-</div>
-
-<div id="faqModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:20000;display:flex;align-items:center;justify-content:center;">
-  <div style="background:var(--panel);color:var(--text);width:min(900px,90vw);max-height:80vh;overflow:auto;padding:20px;border:1px solid #666;">
-    <h2>Marginalia - FAQ</h2>
-    <p><b>Purpose:</b> A distraction-free drafting environment designed for writers who draft from existing outlines and chapter cards.</p>
-    <h3>Features</h3>
-    <details><summary><b>Import Cards</b></summary><p>Import a chapter card file. Cards remain separate from your manuscript and act as reference material while drafting.</p></details>
-    <details><summary><b>Import / Export MD</b></summary><p>Import an existing markdown manuscript or export your current draft as a .md file for Word, Atticus, or other writing software.</p></details>
-    <details><summary><b>Import / Export Project</b></summary><p>Project files save and restore your manuscript, cards, theme, and workspace settings.</p></details>
-    <details><summary><b>Focus Mode</b></summary><p>Hide the outline pane and write with fewer distractions.</p></details>
-    <details><summary><b>Autosave & Restore</b></summary><p>Your work is automatically saved locally and restored when reopening the application.</p></details>
-
-    <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, and E-Ink modes.</p></details>
-
-    <details>
-      <summary><b>Formatting & Markdown</b></summary>
-      <p>Marginalia uses simple Markdown formatting because it is lightweight, reliable, and supported by most modern writing tools.</p>
-    </details>
-<p></p>Marginalia is free and always will be. If it helped you finish a chapter, start a story, or spend a little more time writing than scrolling, and you'd like to support future development, feel free to reach out to the author.
-
-    <h3>Disclaimer</h3>
-    <p>This software is provided "as is" without warranty of any kind...</p>
-
-    <div style="text-align:right;">
-      <button onclick="closeFAQ()">Close</button>
-    </div>
-  </div>
-</div>
-
-<input id="cardsFile" type="file" hidden>
-<input id="mdFile" type="file" hidden>
-<input id="projectFile" type="file" hidden>
-
-<script>
-const quotes=[
-'"How many good books suffer neglect through the inefficiency of their beginnings!"<br><br>— Edgar Allan Poe',
-'"A book must be the axe for the frozen sea within us."<br><br>— Franz Kafka',
-'"You must stay drunk on writing so reality cannot destroy you."<br><br>— Ray Bradbury',
-'"The idea is to write it so that people hear it and it slides through the brain and goes straight to the heart."<br><br>— Maya Angelou',
-'"The scariest moment is always just before you start."<br><br>— Stephen King',
-'"All you have to do is write one true sentence. Write the truest sentence that you know."<br><br>— Ernest Hemingway',
-'"If people cannot write well, they cannot think well, and if they cannot think well, others will do their thinking for them."<br><br>— George Orwell',
-'"I write to find out what I did not know I knew."<br><br>— Robert Frost',
-'"I know nothing in the world that has as much power as a word. Sometimes I write one, and I look at it, until it begins to shine."<br><br>— Emily Dickinson'
-];
-
-quote.innerHTML=quotes[Math.floor(Math.random()*quotes.length)];
-setTimeout(()=>{splash.style.display='none';app.style.display='flex';},3000);
-
-let cardsData=[];
-let sessionStart=0;
-
-function updateStats(){
-  let totalWords=(draft.value.match(/\S+/g)||[]).length;
-  let sessionWords=Math.max(0,totalWords-sessionStart);
-  total.textContent=totalWords;
-  session.textContent=sessionWords;
-  completion.textContent=Math.round((sessionWords/Math.max(1,parseInt(goal.value||1000)))*100)+'%';
-}
-draft.oninput=updateStats;
-goal.oninput=updateStats;
-
-function renderCards(){
-  cards.innerHTML='';
-  cardsData.forEach(c=>{
-    let d=document.createElement('details');
-    d.innerHTML='<summary>'+c.title+'</summary><pre>'+c.notes+'</pre>';
-    cards.appendChild(d);
-  });
-}
-
-function importCards(){
-  cardsFile.onchange=e=>{
-    let r=new FileReader();
-    r.onload=x=>{
-      cardsData=[];
-      x.target.result.split(/^# /m).filter(Boolean).forEach(ch=>{
-        let lines=ch.split('\n');
-        cardsData.push({title:lines[0].trim(),notes:lines.slice(1).join('\n').trim()});
-      });
-      renderCards();
-    };
-    r.readAsText(e.target.files[0]);
-  };
-  cardsFile.click();
-}
-
-function importMD(){
-  mdFile.onchange=e=>{
-    let r=new FileReader();
-    r.onload=x=>{
-      draft.value=x.target.result;
-      sessionStart=(draft.value.match(/\S+/g)||[]).length;
-      updateStats();
-    };
-    r.readAsText(e.target.files[0]);
-  };
-  mdFile.click();
-}
-
-function exportMD(){
-  let a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([draft.value]));
-  a.download='manuscript.md';
-  a.click();
-
-function showFAQ(){ faqModal.classList.remove('hidden'); }
-function closeFAQ(){ faqModal.classList.add('hidden'); }
-
-function focusMode(){ left.classList.toggle('hidden'); divider.classList.toggle('hidden'); }
-function insertText(t){ draft.setRangeText(t,draft.selectionStart,draft.selectionEnd,'end'); updateStats(); }
-function wrap(a,b){
-  let s=draft.selectionStart,e=draft.selectionEnd,t=draft.value.substring(s,e);
-  draft.setRangeText(a+t+b,s,e,'end'); updateStats();
-}
-function alignWrap(dir){
-  let s=draft.selectionStart,e=draft.selectionEnd,t=draft.value.substring(s,e);
-  draft.setRangeText('<p align="'+dir+'">'+t+'</p>',s,e,'end'); updateStats();
-}
-
-function setTheme(n){
-  const r=document.documentElement.style;
-  if(n==='Dark Draft'){r.setProperty('--bg','#1e1f22');r.setProperty('--panel','#2a2c31');r.setProperty('--text','#e6e6e6');r.setProperty('--accent','#c9a86a');}
-  if(n==='Paper Draft'){r.setProperty('--bg','#f4ecd8');r.setProperty('--panel','#efe4ca');r.setProperty('--text','#222');r.setProperty('--accent','#8b6f47');}
-  if(n==='Manuscript'){r.setProperty('--bg','#fff');r.setProperty('--panel','#eee');r.setProperty('--text','#000');r.setProperty('--accent','#666');}
-  if(n==='E-Ink'){r.setProperty('--bg','#fff');r.setProperty('--panel','#fff');r.setProperty('--text','#000');r.setProperty('--accent','#000');}
-}
-
-// --- Autosave (offline) ---
-(() => {
-  const AUTOSAVE_KEY='marginalia_autosave';
-
-  // Restore
-  try{
-    const saved=localStorage.getItem(AUTOSAVE_KEY);
-    if(saved && !draft.value){
-      draft.value=saved;
-      if(typeof updateStats==='function') updateStats();
-    }
-  }catch(e){ console.log(e); }
-
-  // Debounced save
-  let t;
-  draft.addEventListener('input',()=>{
-    clearTimeout(t);
-    t=setTimeout(()=>{
-      try{ localStorage.setItem(AUTOSAVE_KEY,draft.value); }
-      catch(e){ console.log(e); }
-    },600);
-  });
-})();
-</script>
-
-<script>
-window.addEventListener('beforeunload', function (e) {
-  e.preventDefault();
-  e.returnValue = '';
-});
-</script>
-  }
-});
-
-function newProject(){
-  if(confirm("Start a new project?")){
-    localStorage.clear();
-    location.reload();
-  }
-}
-function toggleFullscreen(){
-  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-  else document.exitFullscreen();
-}
 </script>
 
 </body>
