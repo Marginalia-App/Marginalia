@@ -47,7 +47,7 @@
     #splash {
       position: fixed;
       inset: 0;
-      background: #1e1f22; /* ALWAYS Dark Draft background */
+      background: #1e1f22;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -62,18 +62,18 @@
     #splash h1 {
       font-size: 3em;
       margin: 0 0 .4em;
-      color: #e6e6e6; /* ALWAYS Dark Draft text color */
+      color: #e6e6e6;
     }
 
     #splash blockquote {
       max-width: 800px;
       font-size: 1.4em;
       line-height: 1.7;
-      color: #e6e6e6; /* ALWAYS Dark Draft text color */
+      color: #e6e6e6;
     }
 
     #splashTagline {
-      color: #c9a86a; /* ALWAYS Dark Draft accent color */
+      color: #c9a86a;
       margin: 0 0 8px 0;
     }
 
@@ -81,11 +81,11 @@
       margin: 8px 0 0;
       font-size: 0.85em;
       opacity: 0.75;
-      color: #e6e6e6; /* ALWAYS Dark Draft text color */
+      color: #e6e6e6;
     }
 
     #splashCredit a {
-      color: #c9a86a; /* ALWAYS Dark Draft accent color */
+      color: #c9a86a;
       text-decoration: none;
       border-bottom: 1px dotted rgba(201,168,106,.6);
     }
@@ -99,7 +99,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* APP THEME - This changes based on user selection */
+    /* APP THEME */
     :root {
       --bg: #1e1f22;
       --panel: #2a2c31;
@@ -165,7 +165,7 @@
     #divider {
       width: 6px;
       background: var(--accent);
-      cursor: col-resize;
+      flex-shrink: 0;
     }
 
     #right {
@@ -278,6 +278,20 @@
       float: right;
       opacity: 0.5;
       font-size: 0.8em;
+    }
+
+    .toolbar-button {
+      background: var(--accent);
+      border: none;
+      color: #1e1f22;
+      border-radius: 3px;
+      padding: 4px 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .toolbar-button:hover {
+      opacity: 0.85;
     }
 
     pre {
@@ -450,6 +464,20 @@
       background: #3367d6;
     }
 
+    .new-btn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 3px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .new-btn:hover {
+      background: #388e3c;
+    }
+
     @media (max-width: 768px) {
       #left {
         width: 100%;
@@ -474,7 +502,7 @@
 
 <body>
 
-<!-- SPLASH SCREEN - ALWAYS DARK DRAFT THEME (colors hardcoded above) -->
+<!-- SPLASH SCREEN - ALWAYS DARK DRAFT THEME -->
 <div id="splash">
   <img id="splashLogo" src="icon-192.png" srcset="icon-192.png 1x, icon-512.png 2x" alt="Marginalia logo">
   <h1>Marginalia</h1>
@@ -536,7 +564,6 @@
           <summary>📦 Project</summary>
           <button class="menu-button" onclick="importProject()">📥 Import Project</button>
           <button class="menu-button" onclick="exportProject()">📤 Export Project</button>
-          <button class="menu-button" onclick="newProject()">📄 New Project</button>
         </details>
       </details>
     </div>
@@ -568,6 +595,11 @@
         <summary>❓ Help</summary>
         <button class="menu-button" onclick="showFAQ()">📋 FAQ</button>
       </details>
+    </div>
+
+    <!-- New Button -->
+    <div class="group">
+      <button class="new-btn" onclick="newProject()">📄 New</button>
     </div>
 
     <!-- Google Sign In / User Status -->
@@ -705,7 +737,6 @@ let googleToken = null;
 let driveToken = null;
 let gmailToken = null;
 let pendingExportFormat = null;
-let pendingExportDestination = null;
 
 // DOM elements
 const splash = document.getElementById('splash');
@@ -892,6 +923,42 @@ function loadSavedTheme() {
   }
 }
 
+// ---------- NEW PROJECT (HARD RESET) ----------
+function newProject() {
+  if (confirm('Start a new project? This will clear ALL current work including chapter cards.')) {
+    // Clear all data
+    cardsData = [];
+    draft.value = '';
+    goalInput.value = '1000';
+    sessionStart = 0;
+    draftHasChanged = false;
+    
+    // Clear localStorage
+    localStorage.removeItem('marginalia_cards');
+    localStorage.removeItem('marginalia_autosave_draft');
+    localStorage.removeItem('marginalia_autosave_goal');
+    localStorage.removeItem('marginalia_theme');
+    localStorage.removeItem('marginalia_google_user');
+    localStorage.removeItem('marginalia_google_token');
+    
+    // Clear Google auth state
+    googleUser = null;
+    googleToken = null;
+    driveToken = null;
+    gmailToken = null;
+    
+    // Update UI
+    renderCards();
+    updateStats();
+    updateGoogleUI();
+    updateDriveUI();
+    updateEmailUI();
+    
+    // Show confirmation
+    alert('✅ New project created. All data has been cleared.');
+  }
+}
+
 // ============================================================
 // GOOGLE OAUTH
 // ============================================================
@@ -1041,7 +1108,6 @@ function updateDriveUI() {
   const status = document.getElementById('driveStatus');
   const backupBtn = document.getElementById('driveBackupBtn');
   
-  // Update export menu buttons
   const driveButtons = ['driveTxtBtn', 'driveMdBtn', 'driveDocxBtn'];
   const emailButtons = ['emailTxtBtn', 'emailMdBtn', 'emailDocxBtn'];
   
@@ -1436,13 +1502,6 @@ function toggleFullscreen() {
   }
 }
 
-function newProject() {
-  if (confirm('Start a new project? This will clear all current work.')) {
-    localStorage.clear();
-    location.reload();
-  }
-}
-
 // ---------- AUTOSAVE ----------
 const AUTOSAVE_DRAFT_KEY = 'marginalia_autosave_draft';
 const AUTOSAVE_GOAL_KEY = 'marginalia_autosave_goal';
@@ -1497,32 +1556,8 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
-// ---------- DRAG RESIZE DIVIDER ----------
-let isResizing = false;
-if (divider) {
-  divider.addEventListener('mousedown', (e) => {
-    isResizing = true;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  });
-}
-
-document.addEventListener('mousemove', (e) => {
-  if (!isResizing || !leftPanel) return;
-  const containerWidth = document.getElementById('main').offsetWidth;
-  const newWidth = (e.clientX / containerWidth) * 100;
-  if (newWidth > 10 && newWidth < 60) {
-    leftPanel.style.width = newWidth + '%';
-  }
-});
-
-document.addEventListener('mouseup', () => {
-  if (isResizing) {
-    isResizing = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }
-});
+// ---------- DIVIDER (static - no resize) ----------
+// The divider is now static. Left panel width is fixed at 32%.
 
 // ---------- KEYBOARD SHORTCUTS ----------
 document.addEventListener('keydown', (e) => {
