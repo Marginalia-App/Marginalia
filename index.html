@@ -84,7 +84,6 @@
       --panel: #2a2c31;
       --text: #e6e6e6;
       --accent: #c9a86a;
-      --spell-error: #ff6b6b;
     }
 
     body {
@@ -183,69 +182,6 @@
       line-height: 1.6;
       position: relative;
       z-index: 2;
-    }
-
-    #spellOverlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      z-index: 1;
-      padding: 12px;
-      font-family: Georgia, serif;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: transparent;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      overflow: hidden;
-    }
-
-    .spell-error {
-      text-decoration: underline wavy var(--spell-error);
-      text-underline-offset: 2px;
-      cursor: pointer;
-      pointer-events: auto;
-    }
-
-    .spell-error:hover {
-      background: rgba(255, 107, 107, 0.1);
-    }
-
-    #spellContextMenu {
-      position: fixed;
-      background: var(--panel);
-      border: 1px solid #555;
-      border-radius: 4px;
-      padding: 4px 0;
-      z-index: 30000;
-      display: none;
-      min-width: 150px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-
-    #spellContextMenu div {
-      padding: 6px 16px;
-      cursor: pointer;
-      color: var(--text);
-    }
-
-    #spellContextMenu div:hover {
-      background: var(--accent);
-      color: #1e1f22;
-    }
-
-    #spellContextMenu .separator {
-      border-top: 1px solid #555;
-      margin: 4px 0;
-      padding: 0;
-      cursor: default;
-    }
-
-    #spellContextMenu .separator:hover {
-      background: transparent;
     }
 
     #searchBar {
@@ -357,27 +293,6 @@
       border-radius: 8px;
     }
 
-    #dictionaryList {
-      max-height: 300px;
-      overflow-y: auto;
-      margin: 10px 0;
-    }
-
-    .dict-word {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 8px;
-      border-bottom: 1px solid #555;
-    }
-
-    .dict-word button {
-      background: #d32f2f;
-      color: white;
-      padding: 2px 8px;
-      font-size: 0.8em;
-    }
-
     .streak-heatmap {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -404,11 +319,6 @@
 
     .streak-day.today {
       border: 2px solid var(--accent);
-    }
-
-    .spell-suggestion {
-      color: #4caf50;
-      font-size: 0.9em;
     }
 
     #emailForm {
@@ -565,11 +475,9 @@
       <details>
         <summary>Tools</summary>
         <button onclick="toggleSearch()">🔍 Search/Replace</button>
-        <button onclick="openDictionary()">📖 Dictionary</button>
         <button onclick="showStreak()">🔥 Streak</button>
         <button onclick="openCloud()">☁️ Google Drive</button>
         <button onclick="openEmail()">📧 Send Email</button>
-        <button onclick="runSpellCheck()">🔍 Spell Check</button>
       </details>
     </div>
 
@@ -599,8 +507,7 @@
         <span id="searchCount" style="font-size:0.8em;opacity:0.7;"></span>
       </div>
       <div id="draftContainer">
-        <div id="spellOverlay"></div>
-        <textarea id="draft" spellcheck="false" lang="en" placeholder="Start writing..."></textarea>
+        <textarea id="draft" spellcheck="true" lang="en" placeholder="Start writing..."></textarea>
       </div>
     </div>
   </div>
@@ -611,7 +518,6 @@
     | Goal Completion: <span id="completion">0%</span>
     | Total Words: <span id="total">0</span>
     | Timer: <span id="timerStatus">Stopped</span>
-    | Misspelled: <span id="spellCount">0</span>
   </div>
 </div>
 
@@ -629,39 +535,17 @@
     <h2>Marginalia - FAQ</h2>
     <p><b>Purpose:</b> A distraction-free drafting environment for writers.</p>
     <h3>Features</h3>
-    <details><summary><b>Spell Check</b></summary><p>Words are checked against a built-in dictionary. Misspelled words appear with a red wavy underline. Right-click or click on underlined words to see suggested corrections.</p></details>
+    <details><summary><b>Spell Check</b></summary><p>Marginalia uses your device's built-in spell checker. Right-click on underlined words for suggestions and to add words to your dictionary.</p></details>
     <details><summary><b>Email Send</b></summary><p>Send your manuscript via email using your Gmail account directly through the app. Click "Sign in with Google" to connect.</p></details>
     <details><summary><b>Google Drive Backup</b></summary><p>Backup and restore your project using Google Drive. Click "Sign in with Google" to connect.</p></details>
     <details><summary><b>PWA Installation</b></summary><p>Click "Install Now" to add Marginalia to your home screen. Works on mobile and desktop browsers.</p></details>
     <details><summary><b>Search & Replace</b></summary><p>Find text in your document and optionally replace it with new text.</p></details>
-    <details><summary><b>Custom Dictionary</b></summary><p>Add custom words to your dictionary so they aren't flagged as misspelled.</p></details>
     <details><summary><b>Writing Timer</b></summary><p>A Pomodoro-style timer to track your writing sessions.</p></details>
     <details><summary><b>Writing Streak</b></summary><p>Track your daily writing streaks (100 words minimum per day).</p></details>
     <details><summary><b>Export Options</b></summary><p>Export as Markdown, HTML, TXT, Word (DOCX), or EPUB.</p></details>
     <p>Marginalia is free and always will be.</p>
     <div style="text-align:right;margin-top:10px;">
       <button onclick="closeFAQ()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Dictionary Modal -->
-<div id="dictionaryModal" class="modal-overlay">
-  <div class="modal-content">
-    <h2>📖 Custom Dictionary</h2>
-    <p>Add words so they won't be flagged as misspelled.</p>
-    <div style="display:flex;gap:8px;margin:10px 0;">
-      <input id="newWordInput" placeholder="Enter word..." style="flex:1;padding:6px;background:var(--bg);color:var(--text);border:1px solid #555;border-radius:3px;">
-      <button onclick="addCustomWord()">Add Word</button>
-    </div>
-    <div id="dictionaryList"></div>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-      <button onclick="exportDictionary()">Export</button>
-      <button onclick="importDictionary()">Import</button>
-      <button onclick="clearDictionary()">Clear All</button>
-    </div>
-    <div style="text-align:right;margin-top:10px;">
-      <button onclick="closeDictionary()">Close</button>
     </div>
   </div>
 </div>
@@ -731,18 +615,9 @@
   </div>
 </div>
 
-<!-- Spell Check Context Menu -->
-<div id="spellContextMenu">
-  <div id="spellSuggestions"></div>
-  <div class="separator"></div>
-  <div onclick="addWordToDictionary()">Add to Dictionary</div>
-  <div onclick="ignoreSpellError()">Ignore</div>
-</div>
-
 <input id="cardsFile" type="file" hidden>
 <input id="mdFile" type="file" hidden>
 <input id="projectFile" type="file" hidden>
-<input id="dictFile" type="file" hidden>
 
 <script>
 // ============================================================
@@ -755,7 +630,7 @@ const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
 const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.send';
 
 // ============================================================
-// FULL JAVASCRIPT - All features with proper Google OAuth
+// FULL JAVASCRIPT - All features with native OS spellcheck
 // ============================================================
 
 // ---------- DATA ----------
@@ -765,9 +640,6 @@ let draftHasChanged = false;
 let timerInterval = null;
 let timerSeconds = 0;
 let timerRunning = false;
-let currentSpellWord = '';
-let currentSpellStart = 0;
-let spellErrors = [];
 
 // Google Auth state
 let googleUser = null;
@@ -786,8 +658,6 @@ const totalSpan = document.getElementById('total');
 const cardsDiv = document.getElementById('cards');
 const leftPanel = document.getElementById('left');
 const divider = document.getElementById('divider');
-const spellOverlay = document.getElementById('spellOverlay');
-const spellCountSpan = document.getElementById('spellCount');
 
 // ---------- QUOTES ----------
 const quotes = [
@@ -821,201 +691,6 @@ function updateStats() {
   if (sessionSpan) sessionSpan.textContent = sessionWords;
   if (completionSpan) completionSpan.textContent = percent + '%';
 }
-
-// ---------- SPELL CHECK ----------
-const commonWords = new Set([
-  'the','be','to','of','and','a','in','that','have','i','it','for','not','on','with','he','as','you','do','at',
-  'this','but','his','by','from','they','we','say','her','she','or','an','will','my','one','all','would','there',
-  'their','what','so','up','out','if','about','who','get','which','go','me','when','make','can','like','time','no',
-  'just','him','know','take','people','into','year','your','good','some','could','them','see','other','than','then',
-  'now','look','only','come','its','over','think','also','back','after','use','two','how','our','work','first','well',
-  'way','even','new','want','because','any','these','give','day','most','us','is','was','were','are','been','being',
-  'had','did','does','has','having','am','may','might','must','shall','should','will','would','can','could','need',
-  'between','under','above','below','through','across','around','without','within','among','against','during','throughout',
-  'before','after','since','until','while','whereas','although','though','because','since','if','unless','except',
-  'but','yet','so','for','nor','or','and','as','than','that','whether','which','who','whom','whose','what','when',
-  'where','why','how','however','therefore','thus','hence','accordingly','consequently','meanwhile','nevertheless',
-  'moreover','furthermore','likewise','similarly','unlike','whereas','while','whilst','amongst','betwixt','twixt',
-  'write','writing','written','wrote','chapter','book','novel','story','page','word','sentence','paragraph',
-  'character','plot','scene','dialogue','description','narrative','voice','style','theme','genre','fiction','nonfiction',
-  'author','reader','publish','editor','agent','manuscript','draft','revise','edit','proofread','format','title',
-  'hero','heroine','protagonist','antagonist','villain','friend','family','love','hate','fear','joy','sadness','anger',
-  'morning','afternoon','evening','night','day','week','month','year','today','tomorrow','yesterday','now','then',
-  'suddenly','quickly','slowly','carefully','gently','firmly','loudly','quietly','eagerly','reluctantly','happily'
-]);
-
-let customDictionary = [];
-function loadDictionary() {
-  try {
-    const saved = localStorage.getItem('marginalia_dictionary');
-    if (saved) customDictionary = JSON.parse(saved);
-  } catch(e) { customDictionary = []; }
-}
-loadDictionary();
-
-function isWordCorrect(word) {
-  if (!word || word.length <= 1) return true;
-  const clean = word.toLowerCase().replace(/[^a-z']/g, '');
-  if (!clean) return true;
-  if (commonWords.has(clean)) return true;
-  if (customDictionary.includes(clean)) return true;
-  if (/^[0-9]+$/.test(clean)) return true;
-  if (clean.length > 3) {
-    const base = clean.replace(/(ing|ed|es|s|ly|tion|ment|ness|ful|less|able|ible)$/, '');
-    if (base.length > 2 && commonWords.has(base)) return true;
-  }
-  return false;
-}
-
-function getSpellingSuggestions(word) {
-  const suggestions = [];
-  const clean = word.toLowerCase().replace(/[^a-z']/g, '');
-  if (!clean) return suggestions;
-  
-  const variations = [
-    clean, clean + 'e', clean.replace(/e$/, ''),
-    clean + 'ing', clean.replace(/ing$/, ''),
-    clean + 'ed', clean.replace(/ed$/, ''),
-    clean + 's', clean.replace(/s$/, ''),
-    clean + 'es', clean.replace(/es$/, ''),
-    clean + 'ly', clean.replace(/ly$/, ''),
-    clean + 'tion', clean.replace(/tion$/, ''),
-    clean + 'ment', clean.replace(/ment$/, ''),
-    clean + 'ness', clean.replace(/ness$/, ''),
-    clean + 'ful', clean.replace(/ful$/, ''),
-    clean + 'less', clean.replace(/less$/, ''),
-    clean + 'able', clean.replace(/able$/, ''),
-    clean + 'ible', clean.replace(/ible$/, '')
-  ];
-  
-  for (const v of variations) {
-    if (v !== clean && commonWords.has(v) && !suggestions.includes(v)) {
-      suggestions.push(v);
-    }
-  }
-  
-  for (const word of customDictionary) {
-    if (word !== clean && word.length > 2 && !suggestions.includes(word)) {
-      if (Math.abs(word.length - clean.length) <= 2) {
-        if (word[0] === clean[0] || word.slice(0, 2) === clean.slice(0, 2)) {
-          suggestions.push(word);
-        }
-      }
-    }
-  }
-  
-  return suggestions.slice(0, 5);
-}
-
-function runSpellCheck() {
-  const text = draft.value;
-  const words = text.split(/(\s+)/);
-  let html = '';
-  let errorCount = 0;
-  spellErrors = [];
-  let charIndex = 0;
-  
-  for (const word of words) {
-    const clean = word.replace(/[^a-zA-Z']/g, '');
-    if (clean && clean.length > 1 && !isWordCorrect(clean)) {
-      const start = charIndex;
-      const end = charIndex + word.length;
-      spellErrors.push({ word: clean, start, end });
-      html += `<span class="spell-error" data-start="${start}" data-end="${end}" data-word="${clean}">${escapeHtml(word)}</span>`;
-      errorCount++;
-    } else {
-      html += escapeHtml(word);
-    }
-    charIndex += word.length;
-  }
-  
-  spellOverlay.innerHTML = html;
-  if (spellCountSpan) spellCountSpan.textContent = errorCount;
-  
-  document.querySelectorAll('.spell-error').forEach(el => {
-    el.addEventListener('click', function(e) {
-      const word = this.dataset.word;
-      const start = parseInt(this.dataset.start);
-      showSpellSuggestions(e, word, start);
-    });
-    el.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-      const word = this.dataset.word;
-      const start = parseInt(this.dataset.start);
-      showSpellSuggestions(e, word, start);
-    });
-  });
-}
-
-function showSpellSuggestions(e, word, start) {
-  currentSpellWord = word;
-  currentSpellStart = start;
-  const menu = document.getElementById('spellContextMenu');
-  const suggestionsDiv = document.getElementById('spellSuggestions');
-  
-  const suggestions = getSpellingSuggestions(word);
-  suggestionsDiv.innerHTML = '';
-  
-  if (suggestions.length > 0) {
-    suggestions.forEach(suggestion => {
-      const div = document.createElement('div');
-      div.textContent = suggestion;
-      div.onclick = function() {
-        replaceWordWith(suggestion);
-        menu.style.display = 'none';
-      };
-      suggestionsDiv.appendChild(div);
-    });
-  } else {
-    const div = document.createElement('div');
-    div.textContent = '(no suggestions)';
-    div.style.opacity = '0.5';
-    div.style.cursor = 'default';
-    suggestionsDiv.appendChild(div);
-  }
-  
-  menu.style.display = 'block';
-  menu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
-  menu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
-}
-
-function replaceWordWith(newWord) {
-  const text = draft.value;
-  const before = text.substring(0, currentSpellStart);
-  const wordEnd = currentSpellStart + currentSpellWord.length;
-  const after = text.substring(wordEnd);
-  let replacement = newWord;
-  if (currentSpellWord[0] === currentSpellWord[0].toUpperCase()) {
-    replacement = newWord.charAt(0).toUpperCase() + newWord.slice(1);
-  }
-  draft.value = before + replacement + after;
-  draftHasChanged = true;
-  updateStats();
-  runSpellCheck();
-}
-
-function addWordToDictionary() {
-  if (currentSpellWord) {
-    const clean = currentSpellWord.toLowerCase().replace(/[^a-z']/g, '');
-    if (clean && !customDictionary.includes(clean)) {
-      customDictionary.push(clean);
-      localStorage.setItem('marginalia_dictionary', JSON.stringify(customDictionary));
-      document.getElementById('spellContextMenu').style.display = 'none';
-      runSpellCheck();
-    }
-  }
-}
-
-function ignoreSpellError() {
-  document.getElementById('spellContextMenu').style.display = 'none';
-}
-
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('spellContextMenu');
-  if (menu && !menu.contains(e.target)) {
-    menu.style.display = 'none';
-  }
-});
 
 // ---------- SEARCH & REPLACE ----------
 let searchMatches = [];
@@ -1106,7 +781,6 @@ function replaceCurrent() {
   findMatches(document.getElementById('searchInput').value);
   draftHasChanged = true;
   updateStats();
-  runSpellCheck();
 }
 
 function replaceAll() {
@@ -1118,104 +792,8 @@ function replaceAll() {
     draft.value = draft.value.split(searchText).join(replaceText);
     draftHasChanged = true;
     updateStats();
-    runSpellCheck();
     findMatches(searchText);
   }
-}
-
-// ---------- CUSTOM DICTIONARY UI ----------
-function renderDictionary() {
-  const list = document.getElementById('dictionaryList');
-  if (!list) return;
-  list.innerHTML = '';
-  if (customDictionary.length === 0) {
-    list.innerHTML = '<p style="opacity:0.7;">No custom words added yet.</p>';
-    return;
-  }
-  customDictionary.sort().forEach(word => {
-    const div = document.createElement('div');
-    div.className = 'dict-word';
-    div.innerHTML = `
-      <span>${escapeHtml(word)}</span>
-      <button onclick="removeCustomWord('${escapeHtml(word)}')">✕</button>
-    `;
-    list.appendChild(div);
-  });
-}
-
-function openDictionary() {
-  document.getElementById('dictionaryModal').classList.add('active');
-  renderDictionary();
-  document.getElementById('newWordInput').focus();
-}
-
-function closeDictionary() {
-  document.getElementById('dictionaryModal').classList.remove('active');
-}
-
-function addCustomWord() {
-  const input = document.getElementById('newWordInput');
-  const word = input.value.trim().toLowerCase();
-  if (!word) return;
-  if (customDictionary.includes(word)) {
-    alert('Word already in dictionary.');
-    return;
-  }
-  customDictionary.push(word);
-  localStorage.setItem('marginalia_dictionary', JSON.stringify(customDictionary));
-  renderDictionary();
-  input.value = '';
-  input.focus();
-  runSpellCheck();
-}
-
-function removeCustomWord(word) {
-  customDictionary = customDictionary.filter(w => w !== word);
-  localStorage.setItem('marginalia_dictionary', JSON.stringify(customDictionary));
-  renderDictionary();
-  runSpellCheck();
-}
-
-function clearDictionary() {
-  if (confirm('Clear all custom dictionary words?')) {
-    customDictionary = [];
-    localStorage.setItem('marginalia_dictionary', JSON.stringify(customDictionary));
-    renderDictionary();
-    runSpellCheck();
-  }
-}
-
-function exportDictionary() {
-  if (customDictionary.length === 0) {
-    alert('Dictionary is empty.');
-    return;
-  }
-  const content = customDictionary.sort().join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content]));
-  a.download = 'marginalia_dictionary.txt';
-  a.click();
-}
-
-function importDictionary() {
-  const fileInput = document.getElementById('dictFile');
-  fileInput.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = x => {
-      const words = x.target.result.split('\n')
-        .map(w => w.trim().toLowerCase())
-        .filter(w => w && !customDictionary.includes(w));
-      customDictionary = [...customDictionary, ...words];
-      localStorage.setItem('marginalia_dictionary', JSON.stringify(customDictionary));
-      renderDictionary();
-      runSpellCheck();
-      alert(`Added ${words.length} words to dictionary.`);
-    };
-    reader.readAsText(file);
-  };
-  fileInput.click();
 }
 
 // ---------- THEME ----------
@@ -1226,25 +804,21 @@ function setTheme(themeName) {
     root.setProperty('--panel', '#2a2c31');
     root.setProperty('--text', '#e6e6e6');
     root.setProperty('--accent', '#c9a86a');
-    root.setProperty('--spell-error', '#ff6b6b');
   } else if (themeName === 'Paper Draft') {
     root.setProperty('--bg', '#f4ecd8');
     root.setProperty('--panel', '#efe4ca');
     root.setProperty('--text', '#222');
     root.setProperty('--accent', '#8b6f47');
-    root.setProperty('--spell-error', '#c62828');
   } else if (themeName === 'Manuscript') {
     root.setProperty('--bg', '#fff');
     root.setProperty('--panel', '#eee');
     root.setProperty('--text', '#000');
     root.setProperty('--accent', '#666');
-    root.setProperty('--spell-error', '#c62828');
   } else if (themeName === 'E-Ink') {
     root.setProperty('--bg', '#fff');
     root.setProperty('--panel', '#fff');
     root.setProperty('--text', '#000');
     root.setProperty('--accent', '#000');
-    root.setProperty('--spell-error', '#c62828');
   }
   localStorage.setItem('marginalia_theme', themeName);
 }
@@ -1426,7 +1000,6 @@ function closeStreak() {
 
 function initGoogleAuth() {
   if (typeof google === 'undefined') {
-    console.log('Google Identity Services not loaded yet');
     return;
   }
 
@@ -1521,7 +1094,6 @@ async function getOAuthTokens() {
     updateEmailUI();
     
   } catch (error) {
-    console.error('Failed to get OAuth tokens:', error);
     document.getElementById('driveStatus').textContent = '❌ Failed to get Drive access. Please try again.';
     document.getElementById('emailAuthStatus').textContent = '❌ Failed to get Gmail access. Please try again.';
   }
@@ -1709,7 +1281,6 @@ async function restoreFromDrive() {
     draftHasChanged = true;
     renderCards();
     updateStats();
-    runSpellCheck();
     
     status.textContent = `✅ Restored from ${new Date(backupData.timestamp).toLocaleString()}`;
   } catch (error) {
@@ -1928,7 +1499,6 @@ function importMD() {
       sessionStart = getWordCount(draft.value);
       draftHasChanged = true;
       updateStats();
-      runSpellCheck();
     };
     reader.readAsText(file);
   };
@@ -2065,7 +1635,6 @@ function importProject() {
         draftHasChanged = true;
         renderCards();
         updateStats();
-        runSpellCheck();
         if (data.theme) setTheme(data.theme);
       } catch (err) {
         alert('Error importing project: Invalid JSON file');
@@ -2152,7 +1721,6 @@ function restoreFromLocal() {
     }
     if (draft) sessionStart = getWordCount(draft.value);
     updateStats();
-    runSpellCheck();
     updateStreakDisplay();
   } catch (e) { console.log(e); }
 }
@@ -2210,7 +1778,6 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     closeFAQ();
-    closeDictionary();
     closeStreak();
     closeCloud();
     closeEmail();
@@ -2227,16 +1794,7 @@ function init() {
   updateStats();
   updateStreakDisplay();
   
-  let spellTimeout;
-  draft.addEventListener('input', () => {
-    clearTimeout(spellTimeout);
-    spellTimeout = setTimeout(() => {
-      runSpellCheck();
-    }, 500);
-  });
-  
-  setTimeout(runSpellCheck, 1000);
-  
+  // Google Sign-In
   setTimeout(() => {
     if (typeof google !== 'undefined') {
       initGoogleAuth();
@@ -2245,6 +1803,7 @@ function init() {
     }
   }, 500);
   
+  // Hide splash after 3 seconds
   setTimeout(() => {
     if (splash && app) {
       splash.style.display = 'none';
@@ -2254,19 +1813,6 @@ function init() {
 }
 
 init();
-
-console.log('🚀 Marginalia loaded with all features!');
-console.log('✅ Google Client ID: ' + GOOGLE_CLIENT_ID);
-console.log('Features:');
-console.log('  ✅ Search/Replace (Ctrl+F)');
-console.log('  ✅ Spell Check with red underlines & suggestions');
-console.log('  ✅ Writing Timer');
-console.log('  ✅ Writing Streak');
-console.log('  ✅ Google Drive Backup (Sign in with Google)');
-console.log('  ✅ Direct Email via Gmail (Sign in with Google)');
-console.log('  ✅ PWA Installation');
-console.log('  ✅ Export to MD/HTML/TXT/DOCX/EPUB');
-console.log('  ✅ Custom Dictionary');
 </script>
 </body>
 </html>
