@@ -25,7 +25,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://accounts.google.com/gsi/client"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.min.js"></script>
 
   <style>
     * {
@@ -194,30 +193,6 @@
       z-index: 2;
     }
 
-    #searchBar {
-      background: var(--panel);
-      padding: 8px;
-      border-bottom: 1px solid #c9b89a;
-      display: none;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      z-index: 10;
-      flex-shrink: 0;
-    }
-
-    #searchBar input {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid #c9b89a;
-      padding: 4px 8px;
-      border-radius: 3px;
-    }
-
-    #searchBar button {
-      padding: 4px 12px;
-    }
-
     details {
       margin: 4px 0;
       border: 1px solid #c9b89a;
@@ -268,12 +243,6 @@
     .menu-button:disabled {
       opacity: 0.4;
       cursor: not-allowed;
-    }
-
-    .menu-button .shortcut {
-      float: right;
-      opacity: 0.5;
-      font-size: 0.8em;
     }
 
     pre {
@@ -460,6 +429,20 @@
       background: #388e3c;
     }
 
+    .faq-btn {
+      background: var(--accent);
+      color: #f4ecd8;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 3px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .faq-btn:hover {
+      opacity: 0.85;
+    }
+
     @media (max-width: 768px) {
       #left {
         width: 100%;
@@ -547,7 +530,6 @@
             <summary>Manuscript</summary>
             <button class="menu-button" onclick="importFile('txt', 'manuscript')">TXT</button>
             <button class="menu-button" onclick="importFile('md', 'manuscript')">Markdown</button>
-            <button class="menu-button" onclick="importFile('docx', 'manuscript')">Word (DOCX)</button>
           </details>
           <details>
             <summary>Chapter Cards</summary>
@@ -565,13 +547,11 @@
             <summary>Google Drive</summary>
             <button class="menu-button" id="driveTxtBtn" onclick="backupToDrive('txt')" disabled>☁️ TXT</button>
             <button class="menu-button" id="driveMdBtn" onclick="backupToDrive('md')" disabled>☁️ Markdown</button>
-            <button class="menu-button" id="driveDocxBtn" onclick="backupToDrive('docx')" disabled>☁️ Word (DOCX)</button>
           </details>
           <details>
             <summary>Local</summary>
             <button class="menu-button" onclick="exportTXT()">💾 TXT</button>
             <button class="menu-button" onclick="exportMD()">💾 Markdown</button>
-            <button class="menu-button" onclick="exportDOCX()">💾 Word (DOCX)</button>
           </details>
         </details>
         <details>
@@ -585,9 +565,8 @@
     <div class="group">
       <details>
         <summary>👁️ View</summary>
-        <button class="menu-button" onclick="toggleFullscreen()">⛶ Fullscreen <span class="shortcut">F11</span></button>
+        <button class="menu-button" onclick="toggleFullscreen()">⛶ Fullscreen</button>
         <button class="menu-button" onclick="focusMode()">📝 Focus Mode</button>
-        <button class="menu-button" onclick="toggleSearch()">🔍 Search/Replace <span class="shortcut">Ctrl+F</span></button>
       </details>
     </div>
 
@@ -602,17 +581,13 @@
     </div>
 
     <div class="group">
-      <details>
-        <summary>❓ Help</summary>
-        <button class="menu-button" onclick="showFAQ()">📋 FAQ</button>
-      </details>
+      <button class="faq-btn" onclick="showFAQ()">❓ FAQ</button>
     </div>
 
     <div class="group">
       <button class="new-btn" onclick="newProject()">📄 New</button>
     </div>
 
-    <!-- SIGN IN BUTTON - FORCED TO SHOW -->
     <div class="group" style="border-right: none; flex: 1; justify-content: flex-end;">
       <span id="googleUserStatus">
         <button onclick="handleGoogleSignInClick()" class="sign-in-btn">🔑 Sign in with Google</button>
@@ -624,16 +599,6 @@
     <div id="left"><div id="cards"></div></div>
     <div id="divider"></div>
     <div id="right">
-      <div id="searchBar">
-        <input id="searchInput" placeholder="Search..." style="flex:1;">
-        <input id="replaceInput" placeholder="Replace with..." style="flex:1;">
-        <button onclick="findNext()">Find Next</button>
-        <button onclick="findPrev()">Find Prev</button>
-        <button onclick="replaceCurrent()">Replace</button>
-        <button onclick="replaceAll()">Replace All</button>
-        <button onclick="toggleSearch()">✕ Close</button>
-        <span id="searchCount" style="font-size:0.8em;opacity:0.7;"></span>
-      </div>
       <div id="draftContainer">
         <textarea id="draft" spellcheck="true" lang="en" placeholder="Start writing..."></textarea>
       </div>
@@ -660,9 +625,8 @@
     <h2>Marginalia - FAQ</h2>
     <p><b>Purpose:</b> A distraction-free drafting environment for writers who draft from existing outlines and chapter cards.</p>
     <h3>Features</h3>
-    <details><summary><b>Import</b></summary><p>Import manuscript files (TXT, MD, DOCX) or chapter cards (TXT, MD).</p></details>
-    <details><summary><b>Export</b></summary><p>Export your manuscript to Email (TXT, MD), Google Drive (TXT, MD, DOCX), or Local (TXT, MD, DOCX).</p></details>
-    <details><summary><b>Search & Replace</b></summary><p>Press Ctrl+F (Cmd+F on Mac) to find and replace text in your manuscript.</p></details>
+    <details><summary><b>Import</b></summary><p>Import manuscript files (TXT, MD) or chapter cards (TXT, MD).</p></details>
+    <details><summary><b>Export</b></summary><p>Export your manuscript to Email (TXT, MD) or Google Drive (TXT, MD), or Local (TXT, MD).</p></details>
     <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, and E-Ink modes.</p></details>
     <details><summary><b>Google Drive & Email</b></summary><p>Sign in with Google to enable email sending and Drive backup features.</p></details>
     <p>Marginalia is free and always will be.</p>
@@ -784,108 +748,6 @@ function updateStats() {
   if (completionSpan) completionSpan.textContent = percent + '%';
 }
 
-// ---------- SEARCH & REPLACE ----------
-let searchMatches = [];
-let currentMatchIndex = -1;
-
-function toggleSearch() {
-  const bar = document.getElementById('searchBar');
-  if (bar.style.display === 'flex') {
-    bar.style.display = 'none';
-  } else {
-    bar.style.display = 'flex';
-    document.getElementById('searchInput').focus();
-  }
-}
-
-function findMatches(searchText) {
-  if (!searchText) {
-    searchMatches = [];
-    currentMatchIndex = -1;
-    document.getElementById('searchCount').textContent = '';
-    return;
-  }
-
-  const text = draft.value;
-  const matches = [];
-  let index = 0;
-  while (true) {
-    const pos = text.indexOf(searchText, index);
-    if (pos === -1) break;
-    matches.push({ start: pos, end: pos + searchText.length });
-    index = pos + 1;
-  }
-  searchMatches = matches;
-  currentMatchIndex = matches.length > 0 ? 0 : -1;
-  document.getElementById('searchCount').textContent = matches.length > 0 ? 
-    `${currentMatchIndex + 1}/${matches.length}` : 'No matches';
-  
-  if (matches.length > 0) {
-    highlightMatch(currentMatchIndex);
-  }
-}
-
-function highlightMatch(index) {
-  if (index < 0 || index >= searchMatches.length) return;
-  const match = searchMatches[index];
-  draft.focus();
-  draft.setSelectionRange(match.start, match.end);
-  draft.scrollTop = Math.floor(match.start / 80) * 28;
-}
-
-function findNext() {
-  const searchText = document.getElementById('searchInput').value;
-  if (searchMatches.length === 0 || document.getElementById('searchInput').value !== searchText) {
-    findMatches(searchText);
-  } else if (searchMatches.length > 0) {
-    currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
-    highlightMatch(currentMatchIndex);
-    document.getElementById('searchCount').textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
-  }
-}
-
-function findPrev() {
-  const searchText = document.getElementById('searchInput').value;
-  if (searchMatches.length === 0 || document.getElementById('searchInput').value !== searchText) {
-    findMatches(searchText);
-  } else if (searchMatches.length > 0) {
-    currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
-    highlightMatch(currentMatchIndex);
-    document.getElementById('searchCount').textContent = `${currentMatchIndex + 1}/${searchMatches.length}`;
-  }
-}
-
-function replaceCurrent() {
-  const searchText = document.getElementById('searchInput').value;
-  const replaceText = document.getElementById('replaceInput').value;
-  if (!searchText || searchMatches.length === 0 || currentMatchIndex === -1) {
-    findMatches(searchText);
-    if (searchMatches.length === 0) return;
-  }
-  
-  const match = searchMatches[currentMatchIndex];
-  const before = draft.value.substring(0, match.start);
-  const after = draft.value.substring(match.end);
-  draft.value = before + replaceText + after;
-  
-  findMatches(document.getElementById('searchInput').value);
-  draftHasChanged = true;
-  updateStats();
-}
-
-function replaceAll() {
-  const searchText = document.getElementById('searchInput').value;
-  const replaceText = document.getElementById('replaceInput').value;
-  if (!searchText) return;
-  
-  if (confirm(`Replace all "${searchText}" with "${replaceText}"?`)) {
-    draft.value = draft.value.split(searchText).join(replaceText);
-    draftHasChanged = true;
-    updateStats();
-    findMatches(searchText);
-  }
-}
-
 // ---------- THEME ----------
 function setTheme(themeName) {
   const root = document.documentElement.style;
@@ -945,12 +807,6 @@ function newProject() {
     updateGoogleUI();
     updateDriveUI();
     updateEmailUI();
-    
-    searchMatches = [];
-    currentMatchIndex = -1;
-    document.getElementById('searchCount').textContent = '';
-    document.getElementById('searchInput').value = '';
-    document.getElementById('replaceInput').value = '';
     
     alert('✅ New project created. All data has been cleared.');
   }
@@ -1105,7 +961,7 @@ function updateDriveUI() {
   const status = document.getElementById('driveStatus');
   const backupBtn = document.getElementById('driveBackupBtn');
   
-  const driveButtons = ['driveTxtBtn', 'driveMdBtn', 'driveDocxBtn'];
+  const driveButtons = ['driveTxtBtn', 'driveMdBtn'];
   const emailButtons = ['emailTxtBtn', 'emailMdBtn'];
   
   const isConnected = !!(driveToken && googleUser);
@@ -1151,7 +1007,7 @@ function updateEmailUI() {
 
 function importFile(format, type) {
   const fileInput = document.getElementById('fileInput');
-  const accepted = format === 'txt' ? '.txt' : format === 'md' ? '.md,.markdown' : '.docx';
+  const accepted = format === 'txt' ? '.txt' : '.md,.markdown';
   fileInput.accept = accepted;
   
   fileInput.onchange = e => {
@@ -1160,15 +1016,7 @@ function importFile(format, type) {
     
     const reader = new FileReader();
     reader.onload = x => {
-      let content = x.target.result;
-      
-      if (format === 'docx') {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(content, 'text/html');
-        content = doc.body.textContent || content;
-      }
-      
-      draft.value = content;
+      draft.value = x.target.result;
       sessionStart = getWordCount(draft.value);
       draftHasChanged = true;
       updateStats();
@@ -1247,71 +1095,6 @@ function exportMD() {
   setTimeout(() => URL.revokeObjectURL(a.href), 100);
 }
 
-async function exportDOCX() {
-  try {
-    if (typeof docx === 'undefined' || !docx) {
-      alert('DOCX library is still loading. Please wait a moment and try again.');
-      return;
-    }
-    
-    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
-    
-    const lines = draft.value.split('\n');
-    const paragraphs = [];
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed === '') {
-        paragraphs.push(new Paragraph({ spacing: { before: 50, after: 50 } }));
-        continue;
-      }
-      
-      if (trimmed.startsWith('# ')) {
-        paragraphs.push(new Paragraph({
-          text: trimmed.substring(2),
-          heading: HeadingLevel.HEADING_1,
-          spacing: { before: 200, after: 200 }
-        }));
-      } else if (trimmed.startsWith('## ')) {
-        paragraphs.push(new Paragraph({
-          text: trimmed.substring(3),
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 150, after: 150 }
-        }));
-      } else if (trimmed.startsWith('### ')) {
-        paragraphs.push(new Paragraph({
-          text: trimmed.substring(4),
-          heading: HeadingLevel.HEADING_3,
-          spacing: { before: 120, after: 120 }
-        }));
-      } else {
-        paragraphs.push(new Paragraph({
-          children: [new TextRun(line)],
-          spacing: { before: 50, after: 50 }
-        }));
-      }
-    }
-    
-    const doc = new Document({
-      sections: [{
-        properties: {},
-        children: paragraphs
-      }]
-    });
-    
-    const blob = await Packer.toBlob(doc);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'manuscript.docx';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 100);
-    
-  } catch (error) {
-    console.error('DOCX export error:', error);
-    alert('Error creating DOCX file. Please try again or export as TXT/MD instead.');
-  }
-}
-
 // ---------- EXPORT TO GOOGLE DRIVE ----------
 function backupToDrive(format) {
   if (!driveToken) {
@@ -1322,87 +1105,9 @@ function backupToDrive(format) {
   const status = document.getElementById('driveStatus');
   const timestamp = new Date().toISOString().slice(0,10);
   const filename = `manuscript_${timestamp}.${format}`;
-  const mimeType = format === 'txt' ? 'text/plain' : format === 'md' ? 'text/markdown' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  const mimeType = format === 'txt' ? 'text/plain' : 'text/markdown';
   
   status.textContent = `⏳ Backing up ${format.toUpperCase()} to Google Drive...`;
-  
-  if (format === 'docx') {
-    (async function() {
-      try {
-        if (typeof docx === 'undefined' || !docx) {
-          status.textContent = '❌ DOCX library is still loading. Please try again.';
-          return;
-        }
-        
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
-        const lines = draft.value.split('\n');
-        const paragraphs = [];
-        
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed === '') {
-            paragraphs.push(new Paragraph({ spacing: { before: 50, after: 50 } }));
-            continue;
-          }
-          
-          if (trimmed.startsWith('# ')) {
-            paragraphs.push(new Paragraph({
-              text: trimmed.substring(2),
-              heading: HeadingLevel.HEADING_1,
-              spacing: { before: 200, after: 200 }
-            }));
-          } else if (trimmed.startsWith('## ')) {
-            paragraphs.push(new Paragraph({
-              text: trimmed.substring(3),
-              heading: HeadingLevel.HEADING_2,
-              spacing: { before: 150, after: 150 }
-            }));
-          } else if (trimmed.startsWith('### ')) {
-            paragraphs.push(new Paragraph({
-              text: trimmed.substring(4),
-              heading: HeadingLevel.HEADING_3,
-              spacing: { before: 120, after: 120 }
-            }));
-          } else {
-            paragraphs.push(new Paragraph({
-              children: [new TextRun(line)],
-              spacing: { before: 50, after: 50 }
-            }));
-          }
-        }
-        
-        const doc = new Document({
-          sections: [{
-            properties: {},
-            children: paragraphs
-          }]
-        });
-        
-        const blob = await Packer.toBlob(doc);
-        
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify({ name: filename, mimeType: mimeType })], { type: 'application/json' }));
-        form.append('file', blob);
-        
-        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${driveToken}` },
-          body: form
-        });
-        
-        if (response.ok) {
-          status.textContent = `✅ ${format.toUpperCase()} backed up to Google Drive!`;
-          listDriveBackups();
-        } else {
-          const err = await response.json();
-          status.textContent = `❌ Backup failed: ${err.error?.message || 'Unknown error'}`;
-        }
-      } catch (error) {
-        status.textContent = `❌ Backup failed: ${error.message}`;
-      }
-    })();
-    return;
-  }
   
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify({ name: filename, mimeType: mimeType })], { type: 'application/json' }));
@@ -1659,27 +1364,10 @@ window.addEventListener('beforeunload', (e) => {
 
 // ---------- KEYBOARD SHORTCUTS ----------
 document.addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-    e.preventDefault();
-    toggleSearch();
-    if (document.getElementById('searchBar').style.display === 'flex') {
-      document.getElementById('searchInput').focus();
-    }
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
-    e.preventDefault();
-    toggleSearch();
-    if (document.getElementById('searchBar').style.display === 'flex') {
-      document.getElementById('replaceInput').focus();
-    }
-  }
   if (e.key === 'Escape') {
     closeFAQ();
     closeCloud();
     closeEmail();
-    if (document.getElementById('searchBar').style.display === 'flex') {
-      toggleSearch();
-    }
   }
 });
 
@@ -1735,7 +1423,6 @@ function init() {
   restoreFromLocal();
   updateStats();
   
-  // FORCE sign-in button to show immediately
   updateGoogleUI();
   
   setTimeout(() => {
