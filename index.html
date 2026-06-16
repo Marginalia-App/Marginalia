@@ -43,10 +43,11 @@
       filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
     }
 
+    /* SPLASH SCREEN - ALWAYS DARK DRAFT THEME */
     #splash {
       position: fixed;
       inset: 0;
-      background: var(--bg);
+      background: #1e1f22; /* ALWAYS Dark Draft background */
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -58,19 +59,33 @@
       animation: splashFadeIn 900ms ease-out forwards;
     }
 
-    @keyframes splashFadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
+    #splash h1 {
+      font-size: 3em;
+      margin: 0 0 .4em;
+      color: #e6e6e6; /* ALWAYS Dark Draft text color */
+    }
+
+    #splash blockquote {
+      max-width: 800px;
+      font-size: 1.4em;
+      line-height: 1.7;
+      color: #e6e6e6; /* ALWAYS Dark Draft text color */
+    }
+
+    #splashTagline {
+      color: #c9a86a; /* ALWAYS Dark Draft accent color */
+      margin: 0 0 8px 0;
     }
 
     #splashCredit {
       margin: 8px 0 0;
       font-size: 0.85em;
       opacity: 0.75;
+      color: #e6e6e6; /* ALWAYS Dark Draft text color */
     }
 
     #splashCredit a {
-      color: var(--accent);
+      color: #c9a86a; /* ALWAYS Dark Draft accent color */
       text-decoration: none;
       border-bottom: 1px dotted rgba(201,168,106,.6);
     }
@@ -79,6 +94,12 @@
       text-decoration: underline;
     }
 
+    @keyframes splashFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* APP THEME - This changes based on user selection */
     :root {
       --bg: #1e1f22;
       --panel: #2a2c31;
@@ -95,17 +116,6 @@
       color: var(--text);
       font-family: Georgia, serif;
       overflow: hidden;
-    }
-
-    #splash h1 {
-      font-size: 3em;
-      margin: 0 0 .4em;
-    }
-
-    #splash blockquote {
-      max-width: 800px;
-      font-size: 1.4em;
-      line-height: 1.7;
     }
 
     #app {
@@ -133,6 +143,10 @@
       align-items: center;
       border-right: 1px solid #555;
       padding-right: 10px;
+    }
+
+    .group:last-child {
+      border-right: none;
     }
 
     #main {
@@ -421,26 +435,19 @@
       font-size: 0.9em;
     }
 
-    .dropdown-menu {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background: var(--panel);
-      min-width: 200px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-      border: 1px solid #555;
+    .sign-in-btn {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 4px 16px;
       border-radius: 4px;
-      z-index: 1000;
-      padding: 6px;
-      margin-top: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85em;
     }
 
-    .dropdown-content.show {
-      display: block;
+    .sign-in-btn:hover {
+      background: #3367d6;
     }
 
     @media (max-width: 768px) {
@@ -467,6 +474,7 @@
 
 <body>
 
+<!-- SPLASH SCREEN - ALWAYS DARK DRAFT THEME (colors hardcoded above) -->
 <div id="splash">
   <img id="splashLogo" src="icon-192.png" srcset="icon-192.png 1x, icon-512.png 2x" alt="Marginalia logo">
   <h1>Marginalia</h1>
@@ -480,25 +488,10 @@
 
 <div id="app">
   <div id="toolbar">
+    <!-- File Menu -->
     <div class="group">
       <details>
-        <summary>Workspace</summary>
-        <details>
-          <summary>Theme</summary>
-          <button onclick="setTheme('Dark Draft')">Dark Draft</button>
-          <button onclick="setTheme('Paper Draft')">Paper Draft</button>
-          <button onclick="setTheme('Manuscript')">Manuscript</button>
-          <button onclick="setTheme('E-Ink')">E-Ink</button>
-        </details>
-        <button onclick="toggleFullscreen()">Fullscreen</button>
-        <button onclick="focusMode()">Focus Mode</button>
-        <button onclick="newProject()">📄 New</button>
-      </details>
-    </div>
-
-    <div class="group">
-      <details>
-        <summary>File</summary>
+        <summary>📁 File</summary>
         
         <!-- Import Section -->
         <details>
@@ -543,15 +536,41 @@
           <summary>📦 Project</summary>
           <button class="menu-button" onclick="importProject()">📥 Import Project</button>
           <button class="menu-button" onclick="exportProject()">📤 Export Project</button>
+          <button class="menu-button" onclick="newProject()">📄 New Project</button>
         </details>
       </details>
     </div>
 
+    <!-- View Menu -->
     <div class="group">
-      <button onclick="showFAQ()">❓ FAQ</button>
-      <button id="installBtn" onclick="installApp()" style="display:none;">📲 Install</button>
+      <details>
+        <summary>👁️ View</summary>
+        <button class="menu-button" onclick="toggleFullscreen()">⛶ Fullscreen <span class="shortcut">F11</span></button>
+        <button class="menu-button" onclick="focusMode()">📝 Focus Mode</button>
+        <button class="menu-button" onclick="toggleSearch()">🔍 Search/Replace <span class="shortcut">Ctrl+F</span></button>
+      </details>
     </div>
 
+    <!-- Themes Menu -->
+    <div class="group">
+      <details>
+        <summary>🎨 Themes</summary>
+        <button class="menu-button" onclick="setTheme('Dark Draft')">🌙 Dark Draft</button>
+        <button class="menu-button" onclick="setTheme('Paper Draft')">📄 Paper Draft</button>
+        <button class="menu-button" onclick="setTheme('Manuscript')">📖 Manuscript</button>
+        <button class="menu-button" onclick="setTheme('E-Ink')">⚫ E-Ink</button>
+      </details>
+    </div>
+
+    <!-- Help Menu -->
+    <div class="group">
+      <details>
+        <summary>❓ Help</summary>
+        <button class="menu-button" onclick="showFAQ()">📋 FAQ</button>
+      </details>
+    </div>
+
+    <!-- Google Sign In / User Status -->
     <div class="group" style="border-right: none; flex: 1; justify-content: flex-end;">
       <span id="googleUserStatus"></span>
     </div>
@@ -1002,11 +1021,19 @@ function updateGoogleUI() {
       <span class="connected-status">
         <img class="user-avatar" src="${googleUser.picture}" alt="${googleUser.name}">
         ${googleUser.name}
-        <button onclick="signOutGoogle()" style="background:transparent;color:var(--accent);padding:2px 8px;border:1px solid var(--accent);font-size:0.8em;">Sign Out</button>
+        <button onclick="signOutGoogle()" style="background:transparent;color:var(--accent);padding:2px 8px;border:1px solid var(--accent);font-size:0.8em;cursor:pointer;">Sign Out</button>
       </span>
     `;
   } else {
-    statusSpan.innerHTML = `<button onclick="initGoogleAuth()" class="google-btn" style="padding:4px 12px;font-size:0.85em;">🔑 Sign in with Google</button>`;
+    statusSpan.innerHTML = `<button onclick="handleGoogleSignInClick()" class="sign-in-btn">🔑 Sign in with Google</button>`;
+  }
+}
+
+function handleGoogleSignInClick() {
+  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+    google.accounts.id.prompt();
+  } else {
+    alert('Please refresh the page and try again.');
   }
 }
 
@@ -1033,6 +1060,7 @@ function updateDriveUI() {
   if (isConnected) {
     status.innerHTML = `✅ Connected to Google Drive as: <b>${googleUser.name}</b>`;
     backupBtn.disabled = false;
+    listDriveBackups();
   } else {
     status.textContent = 'Sign in with Google to use Drive.';
     backupBtn.disabled = true;
@@ -1047,11 +1075,7 @@ function updateEmailUI() {
   if (gmailToken && googleUser) {
     status.innerHTML = `✅ Connected to Gmail as: <b>${googleUser.name}</b>`;
     form.style.display = 'flex';
-    document.getElementById('emailAuthContainer').innerHTML = `
-      <button onclick="signOutGoogle()" class="google-btn">
-        🔌 Sign Out
-      </button>
-    `;
+    document.getElementById('emailAuthContainer').innerHTML = '';
   } else {
     status.textContent = 'Sign in with Google to send emails.';
     form.style.display = 'none';
@@ -1075,9 +1099,7 @@ function importFile(format, type) {
     reader.onload = x => {
       let content = x.target.result;
       
-      // Handle DOCX (simple HTML extraction for now)
       if (format === 'docx') {
-        // For DOCX, we'll try to extract text from HTML
         const parser = new DOMParser();
         const doc = parser.parseFromString(content, 'text/html');
         content = doc.body.textContent || content;
@@ -1089,11 +1111,7 @@ function importFile(format, type) {
       updateStats();
     };
     
-    if (format === 'docx') {
-      reader.readAsText(file);
-    } else {
-      reader.readAsText(file);
-    }
+    reader.readAsText(file);
   };
   
   fileInput.click();
@@ -1298,8 +1316,6 @@ async function sendEmailDirect(event) {
   const message = document.getElementById('emailMessage').value;
   const format = pendingExportFormat || 'txt';
   const fileContent = getFileContent(format);
-  const mimeType = getMimeType(format);
-  const ext = getFileExtension(format);
   
   const body = `${message}\n\n---\n\n${fileContent}`;
   
