@@ -592,7 +592,6 @@
       <button class="faq-btn" onclick="showFAQ()">❓ FAQ</button>
     </div>
 
-    <!-- INSTALL BUTTON - ADDED BACK -->
     <div class="group">
       <button id="installBtn" class="install-btn" onclick="installApp()" style="display:none;">📲 Install</button>
     </div>
@@ -787,10 +786,11 @@ function setTheme(themeName) {
     root.setProperty('--text', '#000');
     root.setProperty('--accent', '#000');
   } else if (themeName === 'Pride Rainbow') {
-    root.setProperty('--bg', 'linear-gradient(135deg, #ff0000, #ff8800, #ffff00, #00cc00, #0088ff, #8800cc, #ff00ff)');
-    root.setProperty('--panel', 'rgba(0,0,0,0.7)');
-    root.setProperty('--text', '#ffffff');
-    root.setProperty('--accent', '#ffffff');
+    // PASTEL RAINBOW COLORS
+    root.setProperty('--bg', 'linear-gradient(135deg, #ffb3ba, #ffdfba, #ffffba, #baffc9, #bae1ff, #e8b4f8, #f8b4e8)');
+    root.setProperty('--panel', 'rgba(255,255,255,0.8)');
+    root.setProperty('--text', '#222');
+    root.setProperty('--accent', '#8b6f47');
   }
   localStorage.setItem('marginalia_theme', themeName);
 }
