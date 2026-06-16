@@ -7,12 +7,12 @@
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e1f22">
+  <meta name="theme-color" content="#f4ecd8">
   <link rel="icon" href="icon-192.png" sizes="any">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="msapplication-TileColor" content="#1e1f22">
+  <meta name="msapplication-TileColor" content="#f4ecd8">
   <meta name="msapplication-TileImage" content="icon-192.png">
 
   <script>
@@ -30,6 +30,9 @@
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client"></script>
 
+  <!-- DOCX Library for proper Word export -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.min.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -40,7 +43,7 @@
       height: min(120px, 30vw);
       object-fit: contain;
       margin-bottom: 16px;
-      filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,.15));
     }
 
     /* SPLASH SCREEN - ALWAYS PAPER DRAFT THEME */
@@ -278,20 +281,6 @@
       float: right;
       opacity: 0.5;
       font-size: 0.8em;
-    }
-
-    .toolbar-button {
-      background: var(--accent);
-      border: none;
-      color: #f4ecd8;
-      border-radius: 3px;
-      padding: 4px 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .toolbar-button:hover {
-      opacity: 0.85;
     }
 
     pre {
@@ -1162,6 +1151,8 @@ function importFile(format, type) {
       let content = x.target.result;
       
       if (format === 'docx') {
+        // For DOCX import, we'll use the raw text from the document
+        // This is a simple approach - for full DOCX support, we'd need a proper parser
         const parser = new DOMParser();
         const doc = parser.parseFromString(content, 'text/html');
         content = doc.body.textContent || content;
@@ -1234,9 +1225,6 @@ function getFileContent(format) {
   const content = draft.value;
   if (format === 'txt') return content;
   if (format === 'md') return content;
-  if (format === 'docx') {
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Manuscript</title><style>body{font-family:Georgia,serif;line-height:1.8;max-width:800px;margin:40px auto;padding:20px;}</style></head><body>${content.replace(/\n/g, '<br>')}</body></html>`;
-  }
   return content;
 }
 
@@ -1270,15 +1258,62 @@ function exportMD() {
   setTimeout(() => URL.revokeObjectURL(a.href), 100);
 }
 
-function exportDOCX() {
-  const content = draft.value;
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Manuscript</title><style>body{font-family:Georgia,serif;line-height:1.8;max-width:800px;margin:40px auto;padding:20px;}</style></head><body>${content.replace(/\n/g, '<br>')}</body></html>`;
-  const blob = new Blob([html], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'manuscript.docx';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+// ---------- PROPER DOCX EXPORT USING docx LIBRARY ----------
+async function exportDOCX() {
+  const text = draft.value;
+  
+  try {
+    // Check if docx library is loaded
+    if (typeof docx === 'undefined') {
+      alert('DOCX library is loading. Please try again in a moment.');
+      return;
+    }
+    
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+    
+    // Split text into paragraphs
+    const paragraphs = text.split('\n').filter(p => p.trim() !== '');
+    
+    // Create DOCX document
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: paragraphs.map(p => {
+          // Check if it's a heading (starts with #)
+          if (p.startsWith('# ')) {
+            return new Paragraph({
+              text: p.substring(2),
+              heading: HeadingLevel.HEADING_1,
+              spacing: { before: 200, after: 200 }
+            });
+          } else if (p.startsWith('## ')) {
+            return new Paragraph({
+              text: p.substring(3),
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 150, after: 150 }
+            });
+          } else {
+            return new Paragraph({
+              children: [new TextRun(p)],
+              spacing: { before: 100, after: 100 }
+            });
+          }
+        })
+      }]
+    });
+    
+    // Generate DOCX blob
+    const blob = await Packer.toBlob(doc);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'manuscript.docx';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    
+  } catch (error) {
+    console.error('DOCX export error:', error);
+    alert('Error creating DOCX file. Please try again or export as TXT/MD instead.');
+  }
 }
 
 // ---------- EXPORT TO GOOGLE DRIVE ----------
@@ -1293,10 +1328,75 @@ function backupToDrive(format) {
   const timestamp = new Date().toISOString().slice(0,10);
   const filename = `manuscript_${timestamp}${getFileExtension(format)}`;
   const mimeType = getMimeType(format);
-  const fileContent = getFileContent(format);
   
   status.textContent = `⏳ Backing up ${format.toUpperCase()} to Google Drive...`;
   
+  // For DOCX, use the docx library to generate proper file
+  if (format === 'docx') {
+    (async function() {
+      try {
+        if (typeof docx === 'undefined') {
+          status.textContent = '❌ DOCX library is loading. Please try again.';
+          return;
+        }
+        
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+        const paragraphs = content.split('\n').filter(p => p.trim() !== '');
+        
+        const doc = new Document({
+          sections: [{
+            properties: {},
+            children: paragraphs.map(p => {
+              if (p.startsWith('# ')) {
+                return new Paragraph({
+                  text: p.substring(2),
+                  heading: HeadingLevel.HEADING_1,
+                  spacing: { before: 200, after: 200 }
+                });
+              } else if (p.startsWith('## ')) {
+                return new Paragraph({
+                  text: p.substring(3),
+                  heading: HeadingLevel.HEADING_2,
+                  spacing: { before: 150, after: 150 }
+                });
+              } else {
+                return new Paragraph({
+                  children: [new TextRun(p)],
+                  spacing: { before: 100, after: 100 }
+                });
+              }
+            })
+          }]
+        });
+        
+        const blob = await Packer.toBlob(doc);
+        
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify({ name: filename, mimeType: mimeType })], { type: 'application/json' }));
+        form.append('file', blob);
+        
+        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${driveToken}` },
+          body: form
+        });
+        
+        if (response.ok) {
+          status.textContent = `✅ ${format.toUpperCase()} backed up to Google Drive!`;
+          listDriveBackups();
+        } else {
+          const err = await response.json();
+          status.textContent = `❌ Backup failed: ${err.error?.message || 'Unknown error'}`;
+        }
+      } catch (error) {
+        status.textContent = `❌ Backup failed: ${error.message}`;
+      }
+    })();
+    return;
+  }
+  
+  // For TXT and MD, use simple blob upload
+  const fileContent = getFileContent(format);
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify({ name: filename, mimeType: mimeType })], { type: 'application/json' }));
   form.append('file', new Blob([fileContent], { type: mimeType }));
@@ -1377,9 +1477,18 @@ async function sendEmailDirect(event) {
   const subject = document.getElementById('emailSubject').value;
   const message = document.getElementById('emailMessage').value;
   const format = pendingExportFormat || 'txt';
-  const fileContent = getFileContent(format);
   
-  const body = `${message}\n\n---\n\n${fileContent}`;
+  let body;
+  const content = draft.value;
+  
+  if (format === 'txt' || format === 'md') {
+    body = `${message}\n\n---\n\n${content}`;
+  } else {
+    // For DOCX, we'll attach the file and send a message
+    // Since Gmail API doesn't support attachments easily in this flow,
+    // we'll send the plain text version with a note
+    body = `${message}\n\n---\n\n${content}\n\n(Note: Your manuscript was sent as plain text. For DOCX export, please use the File → Export → Local option.)`;
+  }
   
   const status = document.getElementById('emailStatus');
   status.textContent = '⏳ Sending email...';
