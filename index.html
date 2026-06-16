@@ -209,9 +209,61 @@
     }
 
     details {
-      margin: 8px;
+      margin: 4px 0;
       border: 1px solid #555;
-      padding: 6px;
+      padding: 4px 8px;
+    }
+
+    details summary {
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    details summary:hover {
+      color: var(--accent);
+    }
+
+    details details {
+      margin: 4px 0 4px 16px;
+      border: none;
+      border-left: 2px solid #555;
+      padding: 4px 8px;
+    }
+
+    details details summary {
+      font-weight: normal;
+      font-size: 0.95em;
+    }
+
+    .menu-button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      border: none;
+      padding: 4px 8px;
+      margin: 2px 0;
+      font-size: 0.9em;
+      cursor: pointer;
+      border-radius: 3px;
+      font-weight: normal;
+    }
+
+    .menu-button:hover:not(:disabled) {
+      background: var(--accent);
+      color: #1e1f22;
+    }
+
+    .menu-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .menu-button .shortcut {
+      float: right;
+      opacity: 0.5;
+      font-size: 0.8em;
     }
 
     pre {
@@ -238,12 +290,12 @@
       font-weight: bold;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       opacity: 0.85;
     }
 
     button:disabled {
-      opacity: 0.5;
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
@@ -256,15 +308,9 @@
       font-weight: bold;
     }
 
-    #timerDisplay {
-      font-weight: bold;
-      color: var(--accent);
-      font-size: 1.1em;
-    }
-
-    #streakDisplay {
-      color: var(--accent);
-      font-weight: bold;
+    #googleUserStatus {
+      display: inline-flex;
+      align-items: center;
     }
 
     .modal-overlay {
@@ -291,34 +337,6 @@
       padding: 20px;
       border: 1px solid #666;
       border-radius: 8px;
-    }
-
-    .streak-heatmap {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      margin: 10px 0;
-    }
-
-    .streak-day {
-      width: 30px;
-      height: 30px;
-      border-radius: 4px;
-      background: var(--bg);
-      border: 1px solid #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7em;
-    }
-
-    .streak-day.has-written {
-      background: var(--accent);
-      color: #1e1f22;
-    }
-
-    .streak-day.today {
-      border: 2px solid var(--accent);
     }
 
     #emailForm {
@@ -385,11 +403,11 @@
     }
 
     .user-avatar {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       vertical-align: middle;
-      margin-right: 8px;
+      margin-right: 6px;
     }
 
     .connected-status {
@@ -400,6 +418,29 @@
       background: rgba(76, 175, 80, 0.2);
       border-radius: 20px;
       border: 1px solid #4caf50;
+      font-size: 0.9em;
+    }
+
+    .dropdown-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background: var(--panel);
+      min-width: 200px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+      border: 1px solid #555;
+      border-radius: 4px;
+      z-index: 1000;
+      padding: 6px;
+      margin-top: 4px;
+    }
+
+    .dropdown-content.show {
+      display: block;
     }
 
     @media (max-width: 768px) {
@@ -451,43 +492,67 @@
         </details>
         <button onclick="toggleFullscreen()">Fullscreen</button>
         <button onclick="focusMode()">Focus Mode</button>
-        <button onclick="toggleTimer()">⏱️ Timer</button>
+        <button onclick="newProject()">📄 New</button>
       </details>
     </div>
 
     <div class="group">
       <details>
         <summary>File</summary>
-        <button onclick="newProject()">📄 New Project</button>
-        <button onclick="importCards()">Import Chapter Cards</button>
-        <button onclick="importMD()">Import Markdown</button>
-        <button onclick="exportMD()">Export Markdown</button>
-        <button onclick="exportHTML()">Export HTML</button>
-        <button onclick="exportTXT()">Export TXT</button>
-        <button onclick="exportDOCX()">Export Word</button>
-        <button onclick="exportEPUB()">Export EPUB</button>
-        <button onclick="importProject()">Import Project</button>
-        <button onclick="exportProject()">Export Project</button>
+        
+        <!-- Import Section -->
+        <details>
+          <summary>📥 Import</summary>
+          <details>
+            <summary>Manuscript</summary>
+            <button class="menu-button" onclick="importFile('txt', 'manuscript')">TXT</button>
+            <button class="menu-button" onclick="importFile('md', 'manuscript')">Markdown</button>
+            <button class="menu-button" onclick="importFile('docx', 'manuscript')">Word (DOCX)</button>
+          </details>
+          <details>
+            <summary>Chapter Cards</summary>
+            <button class="menu-button" onclick="importCards()">TXT / MD</button>
+          </details>
+        </details>
+
+        <!-- Export Section -->
+        <details>
+          <summary>📤 Export</summary>
+          <details>
+            <summary>Email</summary>
+            <button class="menu-button" id="emailTxtBtn" onclick="openEmail('txt')" disabled>📧 TXT</button>
+            <button class="menu-button" id="emailMdBtn" onclick="openEmail('md')" disabled>📧 Markdown</button>
+            <button class="menu-button" id="emailDocxBtn" onclick="openEmail('docx')" disabled>📧 Word (DOCX)</button>
+          </details>
+          <details>
+            <summary>Google Drive</summary>
+            <button class="menu-button" id="driveTxtBtn" onclick="backupToDrive('txt')" disabled>☁️ TXT</button>
+            <button class="menu-button" id="driveMdBtn" onclick="backupToDrive('md')" disabled>☁️ Markdown</button>
+            <button class="menu-button" id="driveDocxBtn" onclick="backupToDrive('docx')" disabled>☁️ Word (DOCX)</button>
+          </details>
+          <details>
+            <summary>Local</summary>
+            <button class="menu-button" onclick="exportTXT()">💾 TXT</button>
+            <button class="menu-button" onclick="exportMD()">💾 Markdown</button>
+            <button class="menu-button" onclick="exportDOCX()">💾 Word (DOCX)</button>
+          </details>
+        </details>
+
+        <!-- Project Section -->
+        <details>
+          <summary>📦 Project</summary>
+          <button class="menu-button" onclick="importProject()">📥 Import Project</button>
+          <button class="menu-button" onclick="exportProject()">📤 Export Project</button>
+        </details>
       </details>
     </div>
 
     <div class="group">
-      <details>
-        <summary>Tools</summary>
-        <button onclick="toggleSearch()">🔍 Search/Replace</button>
-        <button onclick="showStreak()">🔥 Streak</button>
-        <button onclick="openCloud()">☁️ Google Drive</button>
-        <button onclick="openEmail()">📧 Send Email</button>
-      </details>
-    </div>
-
-    <div class="group">
-      <button onclick="showFAQ()">F.A.Q.</button>
+      <button onclick="showFAQ()">❓ FAQ</button>
+      <button id="installBtn" onclick="installApp()" style="display:none;">📲 Install</button>
     </div>
 
     <div class="group" style="border-right: none; flex: 1; justify-content: flex-end;">
-      <span id="timerDisplay">⏱️ 00:00</span>
-      <span id="streakDisplay">🔥 0</span>
       <span id="googleUserStatus"></span>
     </div>
   </div>
@@ -513,11 +578,10 @@
   </div>
 
   <div id="status">
-    Daily Goal: <input id="goal" value="1000" size="5">
+    Words: <span id="total">0</span>
     | Session: <span id="session">0</span>
-    | Goal Completion: <span id="completion">0%</span>
-    | Total Words: <span id="total">0</span>
-    | Timer: <span id="timerStatus">Stopped</span>
+    | Goal: <input id="goal" value="1000" size="4">
+    | <span id="completion">0%</span>
   </div>
 </div>
 
@@ -533,16 +597,13 @@
 <div id="faqModal" class="modal-overlay">
   <div class="modal-content">
     <h2>Marginalia - FAQ</h2>
-    <p><b>Purpose:</b> A distraction-free drafting environment for writers.</p>
+    <p><b>Purpose:</b> A distraction-free drafting environment for writers who draft from existing outlines and chapter cards.</p>
     <h3>Features</h3>
-    <details><summary><b>Spell Check</b></summary><p>Marginalia uses your device's built-in spell checker. Right-click on underlined words for suggestions and to add words to your dictionary.</p></details>
-    <details><summary><b>Email Send</b></summary><p>Send your manuscript via email using your Gmail account directly through the app. Click "Sign in with Google" to connect.</p></details>
-    <details><summary><b>Google Drive Backup</b></summary><p>Backup and restore your project using Google Drive. Click "Sign in with Google" to connect.</p></details>
-    <details><summary><b>PWA Installation</b></summary><p>Click "Install Now" to add Marginalia to your home screen. Works on mobile and desktop browsers.</p></details>
-    <details><summary><b>Search & Replace</b></summary><p>Find text in your document and optionally replace it with new text.</p></details>
-    <details><summary><b>Writing Timer</b></summary><p>A Pomodoro-style timer to track your writing sessions.</p></details>
-    <details><summary><b>Writing Streak</b></summary><p>Track your daily writing streaks (100 words minimum per day).</p></details>
-    <details><summary><b>Export Options</b></summary><p>Export as Markdown, HTML, TXT, Word (DOCX), or EPUB.</p></details>
+    <details><summary><b>Import</b></summary><p>Import manuscript files (TXT, MD, DOCX) or chapter cards (TXT, MD).</p></details>
+    <details><summary><b>Export</b></summary><p>Export your manuscript to Email, Google Drive, or Local storage in TXT, MD, or DOCX formats.</p></details>
+    <details><summary><b>Search & Replace</b></summary><p>Press Ctrl+F (Cmd+F on Mac) to find and replace text in your manuscript.</p></details>
+    <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, and E-Ink modes.</p></details>
+    <details><summary><b>Google Drive & Email</b></summary><p>Sign in with Google to enable email sending and Drive backup features.</p></details>
     <p>Marginalia is free and always will be.</p>
     <div style="text-align:right;margin-top:10px;">
       <button onclick="closeFAQ()">Close</button>
@@ -550,40 +611,23 @@
   </div>
 </div>
 
-<!-- Streak Modal -->
-<div id="streakModal" class="modal-overlay">
-  <div class="modal-content">
-    <h2>🔥 Writing Streak</h2>
-    <p><b>Current Streak:</b> <span id="streakCurrent">0</span> days</p>
-    <p><b>Best Streak:</b> <span id="streakBest">0</span> days</p>
-    <p><b>Total Writing Days:</b> <span id="streakTotal">0</span></p>
-    <div id="streakHeatmap" class="streak-heatmap"></div>
-    <div style="text-align:right;margin-top:10px;">
-      <button onclick="closeStreak()">Close</button>
-    </div>
-  </div>
-</div>
-
 <!-- Google Drive Modal -->
 <div id="cloudModal" class="modal-overlay">
   <div class="modal-content">
-    <h2>☁️ Google Drive Backup</h2>
-    <p>Backup your project to Google Drive or restore from a backup.</p>
+    <h2>☁️ Google Drive</h2>
+    <p>Connect to Google Drive to backup your manuscript.</p>
     
     <div style="margin:15px 0;padding:15px;background:var(--bg);border-radius:4px;">
-      <div id="driveStatus" style="margin-bottom:10px;">Sign in with Google to use Drive backup.</div>
+      <div id="driveStatus" style="margin-bottom:10px;">Sign in with Google to use Drive.</div>
       <div id="driveAuthContainer"></div>
       <div style="margin-top:10px;">
         <button id="driveBackupBtn" class="google-btn" onclick="backupToDrive()" disabled>
           💾 Backup to Drive
         </button>
-        <button id="driveRestoreBtn" class="google-btn" onclick="restoreFromDrive()" disabled style="margin-left:8px;">
-          📥 Restore from Drive
-        </button>
       </div>
     </div>
     
-    <div id="driveFileList" style="max-height:200px;overflow-y:auto;margin:10px 0;"></div>
+    <div id="driveFileList" style="max-height:150px;overflow-y:auto;margin:10px 0;"></div>
     
     <div style="text-align:right;margin-top:10px;">
       <button onclick="closeCloud()">Close</button>
@@ -615,13 +659,13 @@
   </div>
 </div>
 
+<input id="fileInput" type="file" hidden>
 <input id="cardsFile" type="file" hidden>
-<input id="mdFile" type="file" hidden>
 <input id="projectFile" type="file" hidden>
 
 <script>
 // ============================================================
-// GOOGLE OAUTH CONFIG - YOUR CLIENT ID IS ALREADY INSERTED!
+// GOOGLE OAUTH CONFIG
 // ============================================================
 const GOOGLE_CLIENT_ID = '700935417544-7p8ni9dg4hgo3ce10eoat6ccv3e1pls6.apps.googleusercontent.com';
 
@@ -630,22 +674,19 @@ const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
 const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.send';
 
 // ============================================================
-// FULL JAVASCRIPT - All features with native OS spellcheck
+// DATA
 // ============================================================
-
-// ---------- DATA ----------
 let cardsData = [];
 let sessionStart = 0;
 let draftHasChanged = false;
-let timerInterval = null;
-let timerSeconds = 0;
-let timerRunning = false;
 
 // Google Auth state
 let googleUser = null;
 let googleToken = null;
 let driveToken = null;
 let gmailToken = null;
+let pendingExportFormat = null;
+let pendingExportDestination = null;
 
 // DOM elements
 const splash = document.getElementById('splash');
@@ -832,170 +873,8 @@ function loadSavedTheme() {
   }
 }
 
-// ---------- TIMER ----------
-function toggleTimer() {
-  if (timerRunning) {
-    stopTimer();
-  } else {
-    startTimer();
-  }
-}
-
-function startTimer() {
-  if (timerRunning) return;
-  timerRunning = true;
-  document.getElementById('timerStatus').textContent = 'Running';
-  timerInterval = setInterval(() => {
-    timerSeconds++;
-    updateTimerDisplay();
-  }, 1000);
-}
-
-function stopTimer() {
-  timerRunning = false;
-  clearInterval(timerInterval);
-  document.getElementById('timerStatus').textContent = 'Stopped';
-}
-
-function updateTimerDisplay() {
-  const minutes = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
-  const seconds = String(timerSeconds % 60).padStart(2, '0');
-  document.getElementById('timerDisplay').textContent = `⏱️ ${minutes}:${seconds}`;
-}
-
-// ---------- WRITING STREAK ----------
-function updateStreak() {
-  const today = new Date().toDateString();
-  const wordCount = getWordCount(draft.value);
-  
-  if (wordCount >= 100) {
-    let streakData = JSON.parse(localStorage.getItem('marginalia_streak') || '{}');
-    const existing = streakData[today] || 0;
-    if (wordCount > existing) {
-      streakData[today] = wordCount;
-      localStorage.setItem('marginalia_streak', JSON.stringify(streakData));
-      updateStreakDisplay();
-    }
-  }
-}
-
-function calculateStreak() {
-  const streakData = JSON.parse(localStorage.getItem('marginalia_streak') || '{}');
-  const dates = Object.keys(streakData).sort();
-  if (dates.length === 0) return { current: 0, best: 0, total: 0 };
-  
-  let currentStreak = 0;
-  let bestStreak = 0;
-  let tempStreak = 0;
-  
-  const today = new Date();
-  let checkDate = new Date(today);
-  checkDate.setHours(0, 0, 0, 0);
-  
-  const todayStr = checkDate.toDateString();
-  if (streakData[todayStr]) {
-    currentStreak = 1;
-    let day = new Date(today);
-    day.setDate(day.getDate() - 1);
-    day.setHours(0, 0, 0, 0);
-    
-    while (true) {
-      const dayStr = day.toDateString();
-      if (streakData[dayStr]) {
-        currentStreak++;
-        day.setDate(day.getDate() - 1);
-        day.setHours(0, 0, 0, 0);
-      } else {
-        break;
-      }
-    }
-  } else {
-    let day = new Date(today);
-    day.setDate(day.getDate() - 1);
-    day.setHours(0, 0, 0, 0);
-    const yesterdayStr = day.toDateString();
-    if (streakData[yesterdayStr]) {
-      currentStreak = 1;
-      day.setDate(day.getDate() - 1);
-      day.setHours(0, 0, 0, 0);
-      while (true) {
-        const dayStr = day.toDateString();
-        if (streakData[dayStr]) {
-          currentStreak++;
-          day.setDate(day.getDate() - 1);
-          day.setHours(0, 0, 0, 0);
-        } else {
-          break;
-        }
-      }
-    }
-  }
-  
-  tempStreak = 0;
-  const sortedDates = dates.sort();
-  let prevDate = null;
-  for (const dateStr of sortedDates) {
-    const d = new Date(dateStr);
-    if (prevDate) {
-      const diff = Math.abs((d - prevDate) / (1000 * 60 * 60 * 24));
-      if (diff === 1) {
-        tempStreak++;
-      } else {
-        tempStreak = 1;
-      }
-    } else {
-      tempStreak = 1;
-    }
-    if (tempStreak > bestStreak) bestStreak = tempStreak;
-    prevDate = d;
-  }
-  
-  return { current: currentStreak, best: bestStreak, total: dates.length };
-}
-
-function updateStreakDisplay() {
-  const streak = calculateStreak();
-  document.getElementById('streakDisplay').textContent = `🔥 ${streak.current}`;
-}
-
-function showStreak() {
-  const streak = calculateStreak();
-  document.getElementById('streakCurrent').textContent = streak.current;
-  document.getElementById('streakBest').textContent = streak.best;
-  document.getElementById('streakTotal').textContent = streak.total;
-  
-  const heatmap = document.getElementById('streakHeatmap');
-  heatmap.innerHTML = '';
-  const streakData = JSON.parse(localStorage.getItem('marginalia_streak') || '{}');
-  const today = new Date();
-  
-  for (let i = 29; i >= 0; i--) {
-    const day = new Date(today);
-    day.setDate(day.getDate() - i);
-    day.setHours(0, 0, 0, 0);
-    const dayStr = day.toDateString();
-    const div = document.createElement('div');
-    div.className = 'streak-day';
-    if (streakData[dayStr]) {
-      div.classList.add('has-written');
-      div.textContent = '✍️';
-    } else {
-      div.textContent = '·';
-    }
-    if (i === 0) div.classList.add('today');
-    div.title = dayStr;
-    heatmap.appendChild(div);
-  }
-  
-  document.getElementById('streakModal').classList.add('active');
-}
-
-function closeStreak() {
-  document.getElementById('streakModal').classList.remove('active');
-}
-
 // ============================================================
-// GOOGLE OAUTH WITH GOOGLE IDENTITY SERVICES
+// GOOGLE OAUTH
 // ============================================================
 
 function initGoogleAuth() {
@@ -1040,6 +919,8 @@ function initGoogleAuth() {
       const userData = JSON.parse(savedUser);
       googleUser = userData;
       updateGoogleUI();
+      updateDriveUI();
+      updateEmailUI();
     }
   } catch (e) {}
 }
@@ -1121,28 +1002,40 @@ function updateGoogleUI() {
       <span class="connected-status">
         <img class="user-avatar" src="${googleUser.picture}" alt="${googleUser.name}">
         ${googleUser.name}
-        <button onclick="signOutGoogle()" style="background:transparent;color:var(--accent);padding:2px 8px;border:1px solid var(--accent);">Sign Out</button>
+        <button onclick="signOutGoogle()" style="background:transparent;color:var(--accent);padding:2px 8px;border:1px solid var(--accent);font-size:0.8em;">Sign Out</button>
       </span>
     `;
   } else {
-    statusSpan.innerHTML = '';
+    statusSpan.innerHTML = `<button onclick="initGoogleAuth()" class="google-btn" style="padding:4px 12px;font-size:0.85em;">🔑 Sign in with Google</button>`;
   }
 }
 
 function updateDriveUI() {
   const status = document.getElementById('driveStatus');
   const backupBtn = document.getElementById('driveBackupBtn');
-  const restoreBtn = document.getElementById('driveRestoreBtn');
   
-  if (driveToken && googleUser) {
+  // Update export menu buttons
+  const driveButtons = ['driveTxtBtn', 'driveMdBtn', 'driveDocxBtn'];
+  const emailButtons = ['emailTxtBtn', 'emailMdBtn', 'emailDocxBtn'];
+  
+  const isConnected = !!(driveToken && googleUser);
+  
+  driveButtons.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = !isConnected;
+  });
+  
+  emailButtons.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = !isConnected;
+  });
+  
+  if (isConnected) {
     status.innerHTML = `✅ Connected to Google Drive as: <b>${googleUser.name}</b>`;
     backupBtn.disabled = false;
-    restoreBtn.disabled = false;
-    listDriveBackups();
   } else {
-    status.textContent = 'Sign in with Google to use Drive backup.';
+    status.textContent = 'Sign in with Google to use Drive.';
     backupBtn.disabled = true;
-    restoreBtn.disabled = true;
     document.getElementById('driveFileList').innerHTML = '';
   }
 }
@@ -1166,280 +1059,44 @@ function updateEmailUI() {
 }
 
 // ============================================================
-// GOOGLE DRIVE OPERATIONS
+// IMPORT FUNCTIONS
 // ============================================================
 
-function openCloud() {
-  document.getElementById('cloudModal').classList.add('active');
-  updateDriveUI();
-}
-
-function closeCloud() {
-  document.getElementById('cloudModal').classList.remove('active');
-}
-
-async function backupToDrive() {
-  if (!driveToken) {
-    alert('Please sign in with Google first.');
-    return;
-  }
+function importFile(format, type) {
+  const fileInput = document.getElementById('fileInput');
+  const accepted = format === 'txt' ? '.txt' : format === 'md' ? '.md,.markdown' : '.docx';
+  fileInput.accept = accepted;
   
-  const status = document.getElementById('driveStatus');
-  status.textContent = '⏳ Backing up to Google Drive...';
-  
-  try {
-    const data = {
-      cards: cardsData,
-      draft: draft.value,
-      goal: goalInput.value,
-      theme: localStorage.getItem('marginalia_theme') || 'Dark Draft',
-      timestamp: new Date().toISOString()
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = x => {
+      let content = x.target.result;
+      
+      // Handle DOCX (simple HTML extraction for now)
+      if (format === 'docx') {
+        // For DOCX, we'll try to extract text from HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        content = doc.body.textContent || content;
+      }
+      
+      draft.value = content;
+      sessionStart = getWordCount(draft.value);
+      draftHasChanged = true;
+      updateStats();
     };
     
-    const filename = `marginalia_backup_${new Date().toISOString().slice(0,10)}.json`;
-    const metadata = {
-      name: filename,
-      mimeType: 'application/json'
-    };
-    
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-    
-    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${driveToken}`
-      },
-      body: form
-    });
-    
-    if (response.ok) {
-      status.textContent = '✅ Backup successful!';
-      listDriveBackups();
+    if (format === 'docx') {
+      reader.readAsText(file);
     } else {
-      const error = await response.json();
-      status.textContent = `❌ Backup failed: ${error.error?.message || response.status}`;
+      reader.readAsText(file);
     }
-  } catch (error) {
-    status.textContent = `❌ Error: ${error.message}`;
-  }
-}
-
-async function restoreFromDrive() {
-  if (!driveToken) {
-    alert('Please sign in with Google first.');
-    return;
-  }
+  };
   
-  const status = document.getElementById('driveStatus');
-  status.textContent = '⏳ Finding latest backup...';
-  
-  try {
-    const response = await fetch(
-      'https://www.googleapis.com/drive/v3/files?q=name contains "marginalia_backup_"&orderBy=createdTime desc&pageSize=1',
-      {
-        headers: {
-          'Authorization': `Bearer ${driveToken}`
-        }
-      }
-    );
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    if (!data.files || data.files.length === 0) {
-      status.textContent = '❌ No backups found.';
-      return;
-    }
-    
-    const file = data.files[0];
-    status.textContent = `⏳ Downloading ${file.name}...`;
-    
-    const downloadResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
-      {
-        headers: {
-          'Authorization': `Bearer ${driveToken}`
-        }
-      }
-    );
-    
-    if (!downloadResponse.ok) {
-      throw new Error(`Download failed: ${downloadResponse.status}`);
-    }
-    
-    const backupData = await downloadResponse.json();
-    
-    cardsData = backupData.cards || [];
-    draft.value = backupData.draft || '';
-    goalInput.value = backupData.goal || 1000;
-    if (backupData.theme) setTheme(backupData.theme);
-    sessionStart = getWordCount(draft.value);
-    draftHasChanged = true;
-    renderCards();
-    updateStats();
-    
-    status.textContent = `✅ Restored from ${new Date(backupData.timestamp).toLocaleString()}`;
-  } catch (error) {
-    status.textContent = `❌ Error: ${error.message}`;
-  }
-}
-
-async function listDriveBackups() {
-  if (!driveToken) return;
-  
-  try {
-    const response = await fetch(
-      'https://www.googleapis.com/drive/v3/files?q=name contains "marginalia_backup_"&orderBy=createdTime desc&pageSize=10',
-      {
-        headers: {
-          'Authorization': `Bearer ${driveToken}`
-        }
-      }
-    );
-    
-    if (!response.ok) return;
-    
-    const data = await response.json();
-    const listDiv = document.getElementById('driveFileList');
-    listDiv.innerHTML = '';
-    
-    if (!data.files || data.files.length === 0) {
-      listDiv.innerHTML = '<p style="opacity:0.7;">No backups found.</p>';
-      return;
-    }
-    
-    listDiv.innerHTML = '<p style="font-weight:bold;">Recent Backups:</p>';
-    data.files.forEach(file => {
-      const div = document.createElement('div');
-      div.style.cssText = 'padding:4px 8px;border-bottom:1px solid #555;font-size:0.9em;';
-      div.textContent = `📄 ${file.name} (${new Date(file.createdTime).toLocaleString()})`;
-      listDiv.appendChild(div);
-    });
-  } catch (e) {
-    // Silent fail for listing
-  }
-}
-
-// ============================================================
-// DIRECT EMAIL VIA GMAIL
-// ============================================================
-
-function openEmail() {
-  document.getElementById('emailModal').classList.add('active');
-  document.getElementById('emailStatus').textContent = '';
-  updateEmailUI();
-}
-
-function closeEmail() {
-  document.getElementById('emailModal').classList.remove('active');
-}
-
-async function sendEmailDirect(event) {
-  event.preventDefault();
-  
-  if (!gmailToken) {
-    document.getElementById('emailStatus').textContent = '❌ Please sign in with Google first.';
-    return;
-  }
-  
-  const to = document.getElementById('emailTo').value;
-  const subject = document.getElementById('emailSubject').value;
-  const message = document.getElementById('emailMessage').value;
-  const body = `${message}\n\n---\n\n${draft.value}`;
-  
-  const status = document.getElementById('emailStatus');
-  status.textContent = '⏳ Sending email...';
-  
-  try {
-    const email = [
-      `To: ${to}`,
-      `Subject: ${subject}`,
-      `Content-Type: text/plain; charset=UTF-8`,
-      `MIME-Version: 1.0`,
-      ``,
-      body
-    ].join('\r\n');
-    
-    const encodedEmail = btoa(unescape(encodeURIComponent(email)))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
-    
-    const response = await fetch('https://www.googleapis.com/gmail/v1/users/me/messages/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${gmailToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        raw: encodedEmail
-      })
-    });
-    
-    if (response.ok) {
-      status.textContent = '✅ Email sent successfully!';
-      status.style.color = '#4caf50';
-    } else {
-      const error = await response.json();
-      status.textContent = `❌ Failed: ${error.error?.message || response.status}`;
-      status.style.color = '#ff6b6b';
-    }
-  } catch (error) {
-    status.textContent = `❌ Error: ${error.message}`;
-    status.style.color = '#ff6b6b';
-  }
-}
-
-// ============================================================
-// PWA INSTALLATION
-// ============================================================
-let deferredPrompt = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBanner').style.display = 'block';
-});
-
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').style.display = 'none';
-  deferredPrompt = null;
-});
-
-function installApp() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        document.getElementById('installBanner').style.display = 'none';
-      }
-      deferredPrompt = null;
-    });
-  } else {
-    alert(
-      '📱 To install Marginalia:\n\n' +
-      'On iOS (iPhone/iPad): Share → Add to Home Screen\n' +
-      'On Android: Menu → Install App\n' +
-      'On Desktop (Chrome/Edge): Click install icon in address bar'
-    );
-  }
-}
-
-function dismissInstallBanner() {
-  document.getElementById('installBanner').style.display = 'none';
-  localStorage.setItem('marginalia_dismissed_install', 'true');
-}
-
-if (localStorage.getItem('marginalia_dismissed_install') === 'true') {
-  document.getElementById('installBanner').style.display = 'none';
-}
-
-if (window.matchMedia('(display-mode: standalone)').matches) {
-  document.getElementById('installBanner').style.display = 'none';
+  fileInput.click();
 }
 
 // ---------- CARDS ----------
@@ -1464,9 +1121,10 @@ function escapeHtml(str) {
   });
 }
 
-// ---------- IMPORT/EXPORT ----------
 function importCards() {
   const fileInput = document.getElementById('cardsFile');
+  fileInput.accept = '.txt,.md,.markdown';
+  
   fileInput.onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1488,38 +1146,32 @@ function importCards() {
   fileInput.click();
 }
 
-function importMD() {
-  const fileInput = document.getElementById('mdFile');
-  fileInput.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = x => {
-      draft.value = x.target.result;
-      sessionStart = getWordCount(draft.value);
-      draftHasChanged = true;
-      updateStats();
-    };
-    reader.readAsText(file);
-  };
-  fileInput.click();
+// ============================================================
+// EXPORT FUNCTIONS
+// ============================================================
+
+function getFileContent(format) {
+  const content = draft.value;
+  if (format === 'txt') return content;
+  if (format === 'md') return content;
+  if (format === 'docx') {
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Manuscript</title><style>body{font-family:Georgia,serif;line-height:1.8;max-width:800px;margin:40px auto;padding:20px;}</style></head><body>${content.replace(/\n/g, '<br>')}</body></html>`;
+  }
+  return content;
 }
 
-function exportMD() {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([draft.value]));
-  a.download = 'manuscript.md';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+function getMimeType(format) {
+  if (format === 'txt') return 'text/plain';
+  if (format === 'md') return 'text/markdown';
+  if (format === 'docx') return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  return 'text/plain';
 }
 
-function exportHTML() {
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Manuscript</title><style>body{max-width:800px;margin:40px auto;padding:20px;font-family:Georgia,serif;line-height:1.8;}</style></head><body>${draft.value.replace(/\n/g, '<br>')}</body></html>`;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([html]));
-  a.download = 'manuscript.html';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+function getFileExtension(format) {
+  if (format === 'txt') return '.txt';
+  if (format === 'md') return '.md';
+  if (format === 'docx') return '.docx';
+  return '.txt';
 }
 
 function exportTXT() {
@@ -1530,80 +1182,177 @@ function exportTXT() {
   setTimeout(() => URL.revokeObjectURL(a.href), 100);
 }
 
+function exportMD() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([draft.value]));
+  a.download = 'manuscript.md';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+}
+
 function exportDOCX() {
+  const content = draft.value;
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Manuscript</title><style>body{font-family:Georgia,serif;line-height:1.8;max-width:800px;margin:40px auto;padding:20px;}</style></head><body>${content.replace(/\n/g, '<br>')}</body></html>`;
+  const blob = new Blob([html], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'manuscript.docx';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+}
+
+// ---------- EXPORT TO GOOGLE DRIVE ----------
+function backupToDrive(format) {
+  if (!driveToken) {
+    alert('Please sign in with Google first.');
+    return;
+  }
+  
+  const status = document.getElementById('driveStatus');
+  const content = draft.value;
+  const timestamp = new Date().toISOString().slice(0,10);
+  const filename = `manuscript_${timestamp}${getFileExtension(format)}`;
+  const mimeType = getMimeType(format);
+  const fileContent = getFileContent(format);
+  
+  status.textContent = `⏳ Backing up ${format.toUpperCase()} to Google Drive...`;
+  
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify({ name: filename, mimeType: mimeType })], { type: 'application/json' }));
+  form.append('file', new Blob([fileContent], { type: mimeType }));
+  
+  fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${driveToken}` },
+    body: form
+  })
+  .then(response => {
+    if (response.ok) {
+      status.textContent = `✅ ${format.toUpperCase()} backed up to Google Drive!`;
+      listDriveBackups();
+    } else {
+      return response.json().then(err => { throw new Error(err.error?.message || 'Backup failed'); });
+    }
+  })
+  .catch(error => {
+    status.textContent = `❌ Backup failed: ${error.message}`;
+  });
+}
+
+async function listDriveBackups() {
+  if (!driveToken) return;
+  
   try {
-    const content = draft.value;
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Manuscript</title><style>body{font-family:Georgia,serif;line-height:1.8;}</style></head><body>${content.replace(/\n/g, '<br>')}</body></html>`;
-    const blob = new Blob([html], { type: 'application/msword' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'manuscript.doc';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    const response = await fetch(
+      'https://www.googleapis.com/drive/v3/files?q=name contains "manuscript_"&orderBy=createdTime desc&pageSize=10',
+      {
+        headers: { 'Authorization': `Bearer ${driveToken}` }
+      }
+    );
+    
+    if (!response.ok) return;
+    
+    const data = await response.json();
+    const listDiv = document.getElementById('driveFileList');
+    listDiv.innerHTML = '';
+    
+    if (!data.files || data.files.length === 0) {
+      listDiv.innerHTML = '<p style="opacity:0.7;">No backups found.</p>';
+      return;
+    }
+    
+    listDiv.innerHTML = '<p style="font-weight:bold;">Recent Backups:</p>';
+    data.files.forEach(file => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:4px 8px;border-bottom:1px solid #555;font-size:0.9em;';
+      div.textContent = `📄 ${file.name} (${new Date(file.createdTime).toLocaleString()})`;
+      listDiv.appendChild(div);
+    });
   } catch (e) {
-    alert('DOCX export requires additional libraries. Using DOC format instead.');
-    exportHTML();
+    // Silent fail
   }
 }
 
-function exportEPUB() {
+// ---------- EXPORT TO EMAIL ----------
+function openEmail(format) {
+  pendingExportFormat = format;
+  document.getElementById('emailModal').classList.add('active');
+  document.getElementById('emailStatus').textContent = '';
+  updateEmailUI();
+}
+
+function closeEmail() {
+  document.getElementById('emailModal').classList.remove('active');
+}
+
+async function sendEmailDirect(event) {
+  event.preventDefault();
+  
+  if (!gmailToken) {
+    document.getElementById('emailStatus').textContent = '❌ Please sign in with Google first.';
+    return;
+  }
+  
+  const to = document.getElementById('emailTo').value;
+  const subject = document.getElementById('emailSubject').value;
+  const message = document.getElementById('emailMessage').value;
+  const format = pendingExportFormat || 'txt';
+  const fileContent = getFileContent(format);
+  const mimeType = getMimeType(format);
+  const ext = getFileExtension(format);
+  
+  const body = `${message}\n\n---\n\n${fileContent}`;
+  
+  const status = document.getElementById('emailStatus');
+  status.textContent = '⏳ Sending email...';
+  status.style.color = '';
+  
   try {
-    const content = draft.value;
-    const title = prompt('Enter book title:', 'My Manuscript');
-    const author = prompt('Enter author name:', '');
+    const email = [
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `Content-Type: text/plain; charset=UTF-8`,
+      `MIME-Version: 1.0`,
+      ``,
+      body
+    ].join('\r\n');
     
-    const html = `<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta charset="utf-8"/>
-  <title>${title || 'Manuscript'}</title>
-  <style>
-    body { font-family: Georgia, serif; line-height: 1.8; max-width: 600px; margin: 0 auto; padding: 20px; }
-    h1 { text-align: center; }
-  </style>
-</head>
-<body>
-  <h1>${title || 'Manuscript'}</h1>
-  ${author ? `<p style="text-align:center;">by ${author}</p><br>` : ''}
-  ${content.replace(/\n/g, '<br>')}
-</body>
-</html>`;
+    const encodedEmail = btoa(unescape(encodeURIComponent(email)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
     
-    const zip = new JSZip();
-    zip.file('mimetype', 'application/epub+zip');
-    zip.file('META-INF/container.xml', `<?xml version="1.0" encoding="UTF-8"?>
-<container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0">
-  <rootfiles><rootfile full-path="content.opf" media-type="application/oebps-package+xml"/></rootfiles>
-</container>`);
-    zip.file('content.opf', `<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0">
-  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:title>${title || 'Manuscript'}</dc:title>
-    ${author ? `<dc:creator>${author}</dc:creator>` : ''}
-    <dc:language>en</dc:language>
-  </metadata>
-  <manifest>
-    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-    <item id="content" href="content.xhtml" media-type="application/xhtml+xml"/>
-  </manifest>
-  <spine>
-    <itemref idref="content"/>
-  </spine>
-</package>`);
-    zip.file('content.xhtml', html);
-    zip.file('nav.xhtml', `<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Navigation</title></head><body><nav><ul><li><a href="content.xhtml">Start</a></li></ul></nav></body></html>`);
-    
-    zip.generateAsync({ type: 'blob' }).then(blob => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'manuscript.epub';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    const response = await fetch('https://www.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${gmailToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ raw: encodedEmail })
     });
-  } catch (e) {
-    alert('EPUB export requires JSZip library to be loaded: ' + e.message);
+    
+    if (response.ok) {
+      status.textContent = '✅ Email sent successfully!';
+      status.style.color = '#4caf50';
+      
+      setTimeout(() => {
+        closeEmail();
+      }, 1500);
+      
+    } else {
+      const error = await response.json();
+      status.textContent = `❌ Failed: ${error.error?.message || response.status}`;
+      status.style.color = '#ff6b6b';
+    }
+  } catch (error) {
+    status.textContent = `❌ Error: ${error.message}`;
+    status.style.color = '#ff6b6b';
   }
 }
+
+// ============================================================
+// PROJECT IMPORT/EXPORT
+// ============================================================
 
 function exportProject() {
   const data = {
@@ -1621,6 +1370,8 @@ function exportProject() {
 
 function importProject() {
   const fileInput = document.getElementById('projectFile');
+  fileInput.accept = '.json';
+  
   fileInput.onchange = e => {
     const file = e.target.files[0];
     if (!file) return;
@@ -1638,7 +1389,6 @@ function importProject() {
         if (data.theme) setTheme(data.theme);
       } catch (err) {
         alert('Error importing project: Invalid JSON file');
-        console.error(err);
       }
     };
     reader.readAsText(file);
@@ -1664,7 +1414,7 @@ function focusMode() {
 
 function toggleFullscreen() {
   if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(err => console.log(err));
+    document.documentElement.requestFullscreen().catch(err => {});
   } else {
     document.exitFullscreen();
   }
@@ -1685,7 +1435,7 @@ function saveAllToLocal() {
   try {
     if (draft) localStorage.setItem(AUTOSAVE_DRAFT_KEY, draft.value);
     if (goalInput) localStorage.setItem(AUTOSAVE_GOAL_KEY, goalInput.value);
-  } catch (e) { console.log(e); }
+  } catch (e) {}
 }
 
 let autosaveTimer;
@@ -1693,7 +1443,6 @@ if (draft) {
   draft.addEventListener('input', () => {
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(saveAllToLocal, 600);
-    updateStreak();
   });
 }
 if (goalInput) {
@@ -1721,8 +1470,7 @@ function restoreFromLocal() {
     }
     if (draft) sessionStart = getWordCount(draft.value);
     updateStats();
-    updateStreakDisplay();
-  } catch (e) { console.log(e); }
+  } catch (e) {}
 }
 
 // ---------- BEFOREUNLOAD ----------
@@ -1778,7 +1526,6 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     closeFAQ();
-    closeStreak();
     closeCloud();
     closeEmail();
     if (document.getElementById('searchBar').style.display === 'flex') {
@@ -1787,12 +1534,57 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ---------- PWA INSTALLATION ----------
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'block';
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+  deferredPrompt = null;
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        document.getElementById('installBanner').style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  } else {
+    alert(
+      '📱 To install Marginalia:\n\n' +
+      'On iOS (iPhone/iPad): Share → Add to Home Screen\n' +
+      'On Android: Menu → Install App\n' +
+      'On Desktop (Chrome/Edge): Click install icon in address bar'
+    );
+  }
+}
+
+function dismissInstallBanner() {
+  document.getElementById('installBanner').style.display = 'none';
+  localStorage.setItem('marginalia_dismissed_install', 'true');
+}
+
+if (localStorage.getItem('marginalia_dismissed_install') === 'true') {
+  document.getElementById('installBanner').style.display = 'none';
+}
+
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  document.getElementById('installBanner').style.display = 'none';
+}
+
 // ---------- INITIALIZATION ----------
 function init() {
   loadSavedTheme();
   restoreFromLocal();
   updateStats();
-  updateStreakDisplay();
   
   // Google Sign-In
   setTimeout(() => {
@@ -1802,6 +1594,11 @@ function init() {
       setTimeout(initGoogleAuth, 1000);
     }
   }, 500);
+  
+  // Show install button if available
+  if (deferredPrompt) {
+    document.getElementById('installBtn').style.display = 'inline-block';
+  }
   
   // Hide splash after 3 seconds
   setTimeout(() => {
