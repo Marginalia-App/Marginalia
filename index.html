@@ -43,11 +43,11 @@
       filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
     }
 
-    /* SPLASH SCREEN - ALWAYS DARK DRAFT THEME */
+    /* SPLASH SCREEN - ALWAYS PAPER DRAFT THEME */
     #splash {
       position: fixed;
       inset: 0;
-      background: #1e1f22;
+      background: #f4ecd8;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -62,18 +62,18 @@
     #splash h1 {
       font-size: 3em;
       margin: 0 0 .4em;
-      color: #e6e6e6;
+      color: #222;
     }
 
     #splash blockquote {
       max-width: 800px;
       font-size: 1.4em;
       line-height: 1.7;
-      color: #e6e6e6;
+      color: #222;
     }
 
     #splashTagline {
-      color: #c9a86a;
+      color: #8b6f47;
       margin: 0 0 8px 0;
     }
 
@@ -81,13 +81,13 @@
       margin: 8px 0 0;
       font-size: 0.85em;
       opacity: 0.75;
-      color: #e6e6e6;
+      color: #222;
     }
 
     #splashCredit a {
-      color: #c9a86a;
+      color: #8b6f47;
       text-decoration: none;
-      border-bottom: 1px dotted rgba(201,168,106,.6);
+      border-bottom: 1px dotted rgba(139,111,71,.6);
     }
 
     #splashCredit a:hover {
@@ -99,12 +99,12 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* APP THEME */
+    /* APP THEME - DEFAULT IS PAPER DRAFT */
     :root {
-      --bg: #1e1f22;
-      --panel: #2a2c31;
-      --text: #e6e6e6;
-      --accent: #c9a86a;
+      --bg: #f4ecd8;
+      --panel: #efe4ca;
+      --text: #222;
+      --accent: #8b6f47;
     }
 
     body {
@@ -141,7 +141,7 @@
       display: flex;
       gap: 4px;
       align-items: center;
-      border-right: 1px solid #555;
+      border-right: 1px solid #c9b89a;
       padding-right: 10px;
     }
 
@@ -201,7 +201,7 @@
     #searchBar {
       background: var(--panel);
       padding: 8px;
-      border-bottom: 1px solid #555;
+      border-bottom: 1px solid #c9b89a;
       display: none;
       gap: 8px;
       align-items: center;
@@ -213,7 +213,7 @@
     #searchBar input {
       background: var(--bg);
       color: var(--text);
-      border: 1px solid #555;
+      border: 1px solid #c9b89a;
       padding: 4px 8px;
       border-radius: 3px;
     }
@@ -224,7 +224,7 @@
 
     details {
       margin: 4px 0;
-      border: 1px solid #555;
+      border: 1px solid #c9b89a;
       padding: 4px 8px;
     }
 
@@ -240,7 +240,7 @@
     details details {
       margin: 4px 0 4px 16px;
       border: none;
-      border-left: 2px solid #555;
+      border-left: 2px solid #c9b89a;
       padding: 4px 8px;
     }
 
@@ -266,7 +266,7 @@
 
     .menu-button:hover:not(:disabled) {
       background: var(--accent);
-      color: #1e1f22;
+      color: #f4ecd8;
     }
 
     .menu-button:disabled {
@@ -283,7 +283,7 @@
     .toolbar-button {
       background: var(--accent);
       border: none;
-      color: #1e1f22;
+      color: #f4ecd8;
       border-radius: 3px;
       padding: 4px 12px;
       font-weight: bold;
@@ -313,7 +313,7 @@
     button {
       background: var(--accent);
       border: none;
-      color: #1e1f22;
+      color: #f4ecd8;
       border-radius: 3px;
       font-weight: bold;
     }
@@ -329,7 +329,7 @@
 
     .badge {
       background: var(--accent);
-      color: #1e1f22;
+      color: #f4ecd8;
       padding: 2px 8px;
       border-radius: 12px;
       font-size: 0.8em;
@@ -363,7 +363,7 @@
       max-height: 80vh;
       overflow: auto;
       padding: 20px;
-      border: 1px solid #666;
+      border: 1px solid #c9b89a;
       border-radius: 8px;
     }
 
@@ -376,7 +376,7 @@
     #emailForm input, #emailForm textarea {
       background: var(--bg);
       color: var(--text);
-      border: 1px solid #555;
+      border: 1px solid #c9b89a;
       padding: 8px;
       border-radius: 3px;
       font-family: inherit;
@@ -502,7 +502,7 @@
 
 <body>
 
-<!-- SPLASH SCREEN - ALWAYS DARK DRAFT THEME -->
+<!-- SPLASH SCREEN - ALWAYS PAPER DRAFT THEME -->
 <div id="splash">
   <img id="splashLogo" src="icon-192.png" srcset="icon-192.png 1x, icon-512.png 2x" alt="Marginalia logo">
   <h1>Marginalia</h1>
@@ -597,7 +597,7 @@
       </details>
     </div>
 
-    <!-- New Button -->
+    <!-- NEW BUTTON - GREEN -->
     <div class="group">
       <button class="new-btn" onclick="newProject()">📄 New</button>
     </div>
@@ -919,7 +919,8 @@ function loadSavedTheme() {
   if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink'].includes(savedTheme)) {
     setTheme(savedTheme);
   } else {
-    setTheme('Dark Draft');
+    // DEFAULT THEME: PAPER DRAFT
+    setTheme('Paper Draft');
   }
 }
 
@@ -933,13 +934,8 @@ function newProject() {
     sessionStart = 0;
     draftHasChanged = false;
     
-    // Clear localStorage
-    localStorage.removeItem('marginalia_cards');
-    localStorage.removeItem('marginalia_autosave_draft');
-    localStorage.removeItem('marginalia_autosave_goal');
-    localStorage.removeItem('marginalia_theme');
-    localStorage.removeItem('marginalia_google_user');
-    localStorage.removeItem('marginalia_google_token');
+    // Clear ALL localStorage
+    localStorage.clear();
     
     // Clear Google auth state
     googleUser = null;
@@ -1441,7 +1437,7 @@ function exportProject() {
     cards: cardsData,
     draft: draft.value,
     goal: goalInput.value,
-    theme: localStorage.getItem('marginalia_theme') || 'Dark Draft'
+    theme: localStorage.getItem('marginalia_theme') || 'Paper Draft'
   };
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)]));
