@@ -108,6 +108,7 @@
       display: flex;
       flex-direction: column;
       background: var(--bg);
+      background-attachment: fixed;
       color: var(--text);
       font-family: Georgia, serif;
       overflow: hidden;
@@ -123,6 +124,7 @@
       background: var(--panel);
       padding: 8px;
       flex-shrink: 0;
+      backdrop-filter: blur(10px);
     }
 
     #toolbar {
@@ -136,7 +138,7 @@
       display: flex;
       gap: 4px;
       align-items: center;
-      border-right: 1px solid #c9b89a;
+      border-right: 1px solid rgba(255,255,255,0.2);
       padding-right: 10px;
     }
 
@@ -155,6 +157,7 @@
       width: 32%;
       background: var(--panel);
       overflow: auto;
+      backdrop-filter: blur(10px);
     }
 
     #divider {
@@ -195,8 +198,9 @@
 
     details {
       margin: 4px 0;
-      border: 1px solid #c9b89a;
+      border: 1px solid rgba(255,255,255,0.2);
       padding: 4px 8px;
+      border-radius: 4px;
     }
 
     details summary {
@@ -211,7 +215,7 @@
     details details {
       margin: 4px 0 4px 16px;
       border: none;
-      border-left: 2px solid #c9b89a;
+      border-left: 2px solid rgba(255,255,255,0.2);
       padding: 4px 8px;
     }
 
@@ -237,7 +241,7 @@
 
     .menu-button:hover:not(:disabled) {
       background: var(--accent);
-      color: #f4ecd8;
+      color: var(--bg);
     }
 
     .menu-button:disabled {
@@ -264,7 +268,7 @@
     button {
       background: var(--accent);
       border: none;
-      color: #f4ecd8;
+      color: var(--bg);
       border-radius: 3px;
       font-weight: bold;
     }
@@ -280,7 +284,7 @@
 
     .badge {
       background: var(--accent);
-      color: #f4ecd8;
+      color: var(--bg);
       padding: 2px 8px;
       border-radius: 12px;
       font-size: 0.8em;
@@ -314,8 +318,9 @@
       max-height: 80vh;
       overflow: auto;
       padding: 20px;
-      border: 1px solid #c9b89a;
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 8px;
+      backdrop-filter: blur(20px);
     }
 
     #emailForm {
@@ -327,7 +332,7 @@
     #emailForm input, #emailForm textarea {
       background: var(--bg);
       color: var(--text);
-      border: 1px solid #c9b89a;
+      border: 1px solid rgba(255,255,255,0.2);
       padding: 8px;
       border-radius: 3px;
       font-family: inherit;
@@ -358,27 +363,6 @@
     .google-btn:disabled {
       background: #666;
       cursor: not-allowed;
-    }
-
-    #installBanner {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--panel);
-      border: 2px solid var(--accent);
-      border-radius: 12px;
-      padding: 16px 24px;
-      z-index: 10000;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      text-align: center;
-      max-width: 90vw;
-    }
-
-    #installBanner button {
-      margin: 8px 4px;
-      padding: 8px 20px;
     }
 
     .user-avatar {
@@ -431,7 +415,7 @@
 
     .faq-btn {
       background: var(--accent);
-      color: #f4ecd8;
+      color: var(--bg);
       border: none;
       padding: 4px 12px;
       border-radius: 3px;
@@ -441,6 +425,29 @@
 
     .faq-btn:hover {
       opacity: 0.85;
+    }
+
+    .modal-content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .modal-content a:hover {
+      text-decoration: underline;
+    }
+
+    .install-btn {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 3px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .install-btn:hover {
+      background: #3367d6;
     }
 
     @media (max-width: 768px) {
@@ -577,11 +584,17 @@
         <button class="menu-button" onclick="setTheme('Paper Draft')">📄 Paper Draft</button>
         <button class="menu-button" onclick="setTheme('Manuscript')">📖 Manuscript</button>
         <button class="menu-button" onclick="setTheme('E-Ink')">⚫ E-Ink</button>
+        <button class="menu-button" onclick="setTheme('Pride Rainbow')">🌈 Pride Rainbow</button>
       </details>
     </div>
 
     <div class="group">
       <button class="faq-btn" onclick="showFAQ()">❓ FAQ</button>
+    </div>
+
+    <!-- INSTALL BUTTON - ADDED BACK -->
+    <div class="group">
+      <button id="installBtn" class="install-btn" onclick="installApp()" style="display:none;">📲 Install</button>
     </div>
 
     <div class="group">
@@ -613,13 +626,6 @@
   </div>
 </div>
 
-<div id="installBanner">
-  <p style="margin:0 0 8px 0;font-weight:bold;">📱 Install Marginalia</p>
-  <p style="margin:0 0 12px 0;font-size:0.9em;opacity:0.8;">Get the app on your home screen for offline access</p>
-  <button id="installBtn" onclick="installApp()">📲 Install Now</button>
-  <button onclick="dismissInstallBanner()">Not Now</button>
-</div>
-
 <div id="faqModal" class="modal-overlay">
   <div class="modal-content">
     <h2>Marginalia - FAQ</h2>
@@ -627,9 +633,18 @@
     <h3>Features</h3>
     <details><summary><b>Import</b></summary><p>Import manuscript files (TXT, MD) or chapter cards (TXT, MD).</p></details>
     <details><summary><b>Export</b></summary><p>Export your manuscript to Email (TXT, MD) or Google Drive (TXT, MD), or Local (TXT, MD).</p></details>
-    <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, and E-Ink modes.</p></details>
+    <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, E-Ink, and Pride Rainbow modes.</p></details>
     <details><summary><b>Google Drive & Email</b></summary><p>Sign in with Google to enable email sending and Drive backup features.</p></details>
-    <p>Marginalia is free and always will be.</p>
+    
+    <p style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.2);">
+      <em>Marginalia is free and always will be. If it helped you finish a chapter, start a story, or spend a little more time writing than scrolling, and you'd like to support future development, feel free to reach out to the author.</em>
+    </p>
+    
+    <p>
+      📧 <a href="mailto:author@jvmolenaar.com" style="color:var(--accent);">author@jvmolenaar.com</a><br>
+      🌐 <a href="https://jvmolenaar.com" target="_blank" style="color:var(--accent);">https://jvmolenaar.com</a>
+    </p>
+    
     <div style="text-align:right;margin-top:10px;">
       <button onclick="closeFAQ()">Close</button>
     </div>
@@ -771,13 +786,18 @@ function setTheme(themeName) {
     root.setProperty('--panel', '#fff');
     root.setProperty('--text', '#000');
     root.setProperty('--accent', '#000');
+  } else if (themeName === 'Pride Rainbow') {
+    root.setProperty('--bg', 'linear-gradient(135deg, #ff0000, #ff8800, #ffff00, #00cc00, #0088ff, #8800cc, #ff00ff)');
+    root.setProperty('--panel', 'rgba(0,0,0,0.7)');
+    root.setProperty('--text', '#ffffff');
+    root.setProperty('--accent', '#ffffff');
   }
   localStorage.setItem('marginalia_theme', themeName);
 }
 
 function loadSavedTheme() {
   const savedTheme = localStorage.getItem('marginalia_theme');
-  if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink'].includes(savedTheme)) {
+  if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink', 'Pride Rainbow'].includes(savedTheme)) {
     setTheme(savedTheme);
   } else {
     setTheme('Paper Draft');
@@ -1377,11 +1397,11 @@ let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById('installBanner').style.display = 'block';
+  document.getElementById('installBtn').style.display = 'inline-block';
 });
 
 window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').style.display = 'none';
+  document.getElementById('installBtn').style.display = 'none';
   deferredPrompt = null;
 });
 
@@ -1390,7 +1410,7 @@ function installApp() {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
-        document.getElementById('installBanner').style.display = 'none';
+        document.getElementById('installBtn').style.display = 'none';
       }
       deferredPrompt = null;
     });
@@ -1402,19 +1422,6 @@ function installApp() {
       'On Desktop (Chrome/Edge): Click install icon in address bar'
     );
   }
-}
-
-function dismissInstallBanner() {
-  document.getElementById('installBanner').style.display = 'none';
-  localStorage.setItem('marginalia_dismissed_install', 'true');
-}
-
-if (localStorage.getItem('marginalia_dismissed_install') === 'true') {
-  document.getElementById('installBanner').style.display = 'none';
-}
-
-if (window.matchMedia('(display-mode: standalone)').matches) {
-  document.getElementById('installBanner').style.display = 'none';
 }
 
 // ---------- INITIALIZATION ----------
@@ -1432,10 +1439,6 @@ function init() {
       setTimeout(initGoogleAuth, 1000);
     }
   }, 500);
-  
-  if (deferredPrompt) {
-    document.getElementById('installBtn').style.display = 'inline-block';
-  }
   
   setTimeout(() => {
     if (splash && app) {
