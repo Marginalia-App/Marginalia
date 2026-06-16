@@ -108,6 +108,7 @@
       --panel: #efe4ca;
       --text: #222;
       --accent: #8b6f47;
+      --font-size: 1rem;
     }
 
     body {
@@ -195,8 +196,8 @@
       padding: 12px;
       resize: none;
       font-family: Georgia, serif;
-      font-size: 1rem;
-      line-height: 1.6;
+      font-size: var(--font-size);
+      line-height: 1.8;
       position: relative;
       z-index: 2;
     }
@@ -467,6 +468,7 @@
       background: #388e3c;
     }
 
+    /* Responsive font sizes - BIGGER on smaller screens for readability */
     @media (max-width: 768px) {
       #left {
         width: 100%;
@@ -477,6 +479,7 @@
       }
       #toolbar {
         gap: 4px;
+        font-size: 0.85rem;
       }
       .group {
         padding-right: 4px;
@@ -484,6 +487,46 @@
       .group details {
         margin: 2px;
         padding: 2px;
+      }
+      :root {
+        --font-size: 1.1rem;
+      }
+      #draft {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --font-size: 1.2rem;
+      }
+      #draft {
+        padding: 20px 16px;
+      }
+      #toolbar {
+        font-size: 0.8rem;
+      }
+      .group details {
+        font-size: 0.8rem;
+      }
+      button, select, input {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+      }
+      #status {
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      :root {
+        --font-size: 1.05rem;
+      }
+    }
+
+    @media (min-width: 1600px) {
+      :root {
+        --font-size: 1.1rem;
       }
     }
   </style>
@@ -532,7 +575,6 @@
             <summary>Email</summary>
             <button class="menu-button" id="emailTxtBtn" onclick="openEmail('txt')" disabled>📧 TXT</button>
             <button class="menu-button" id="emailMdBtn" onclick="openEmail('md')" disabled>📧 Markdown</button>
-            <button class="menu-button" id="emailDocxBtn" onclick="openEmail('docx')" disabled>📧 Word (DOCX)</button>
           </details>
           <details>
             <summary>Google Drive</summary>
@@ -640,7 +682,7 @@
     <p><b>Purpose:</b> A distraction-free drafting environment for writers who draft from existing outlines and chapter cards.</p>
     <h3>Features</h3>
     <details><summary><b>Import</b></summary><p>Import manuscript files (TXT, MD, DOCX) or chapter cards (TXT, MD).</p></details>
-    <details><summary><b>Export</b></summary><p>Export your manuscript to Email, Google Drive, or Local storage in TXT, MD, or DOCX formats.</p></details>
+    <details><summary><b>Export</b></summary><p>Export your manuscript to Email (TXT, MD), Google Drive (TXT, MD, DOCX), or Local (TXT, MD, DOCX).</p></details>
     <details><summary><b>Search & Replace</b></summary><p>Press Ctrl+F (Cmd+F on Mac) to find and replace text in your manuscript.</p></details>
     <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, and E-Ink modes.</p></details>
     <details><summary><b>Google Drive & Email</b></summary><p>Sign in with Google to enable email sending and Drive backup features.</p></details>
@@ -719,6 +761,7 @@ const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.send';
 let cardsData = [];
 let sessionStart = 0;
 let draftHasChanged = false;
+let docxLibraryReady = false;
 
 // Google Auth state
 let googleUser = null;
@@ -758,14 +801,15 @@ if (quoteElement) {
 
 // ---------- WORD COUNT ----------
 function getWordCount(text) {
-  return (text.match(/\S+/g) || []).length;
+  if (!text || text.trim() === '') return 0;
+  return text.trim().split(/\s+/).length;
 }
 
 function updateStats() {
   const totalWords = getWordCount(draft.value);
   const sessionWords = Math.max(0, totalWords - sessionStart);
-  const goal = parseInt(goalInput.value || 1000);
-  const percent = goal > 0 ? Math.round((sessionWords / goal) * 100) : 0;
+  const goal = parseInt(goalInput.value) || 1000;
+  const percent = goal > 0 ? Math.min(100, Math.round((sessionWords / goal) * 100)) : 0;
   
   if (totalSpan) totalSpan.textContent = totalWords;
   if (sessionSpan) sessionSpan.textContent = sessionWords;
@@ -908,7 +952,6 @@ function loadSavedTheme() {
   if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink'].includes(savedTheme)) {
     setTheme(savedTheme);
   } else {
-    // DEFAULT THEME: PAPER DRAFT
     setTheme('Paper Draft');
   }
 }
@@ -916,30 +959,33 @@ function loadSavedTheme() {
 // ---------- NEW PROJECT (HARD RESET) ----------
 function newProject() {
   if (confirm('Start a new project? This will clear ALL current work including chapter cards.')) {
-    // Clear all data
     cardsData = [];
     draft.value = '';
     goalInput.value = '1000';
     sessionStart = 0;
     draftHasChanged = false;
     
-    // Clear ALL localStorage
     localStorage.clear();
     
-    // Clear Google auth state
     googleUser = null;
     googleToken = null;
     driveToken = null;
     gmailToken = null;
     
-    // Update UI
+    setTheme('Paper Draft');
+    
     renderCards();
     updateStats();
     updateGoogleUI();
     updateDriveUI();
     updateEmailUI();
     
-    // Show confirmation
+    searchMatches = [];
+    currentMatchIndex = -1;
+    document.getElementById('searchCount').textContent = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('replaceInput').value = '';
+    
     alert('✅ New project created. All data has been cleared.');
   }
 }
@@ -1094,7 +1140,7 @@ function updateDriveUI() {
   const backupBtn = document.getElementById('driveBackupBtn');
   
   const driveButtons = ['driveTxtBtn', 'driveMdBtn', 'driveDocxBtn'];
-  const emailButtons = ['emailTxtBtn', 'emailMdBtn', 'emailDocxBtn'];
+  const emailButtons = ['emailTxtBtn', 'emailMdBtn'];
   
   const isConnected = !!(driveToken && googleUser);
   
@@ -1151,8 +1197,6 @@ function importFile(format, type) {
       let content = x.target.result;
       
       if (format === 'docx') {
-        // For DOCX import, we'll use the raw text from the document
-        // This is a simple approach - for full DOCX support, we'd need a proper parser
         const parser = new DOMParser();
         const doc = parser.parseFromString(content, 'text/html');
         content = doc.body.textContent || content;
@@ -1258,51 +1302,60 @@ function exportMD() {
   setTimeout(() => URL.revokeObjectURL(a.href), 100);
 }
 
-// ---------- PROPER DOCX EXPORT USING docx LIBRARY ----------
 async function exportDOCX() {
   const text = draft.value;
   
   try {
-    // Check if docx library is loaded
-    if (typeof docx === 'undefined') {
-      alert('DOCX library is loading. Please try again in a moment.');
+    if (typeof docx === 'undefined' || !docx) {
+      alert('DOCX library is still loading. Please wait a moment and try again.');
       return;
     }
     
     const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
     
-    // Split text into paragraphs
-    const paragraphs = text.split('\n').filter(p => p.trim() !== '');
+    const lines = text.split('\n');
+    const paragraphs = [];
     
-    // Create DOCX document
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed === '') {
+        paragraphs.push(new Paragraph({ spacing: { before: 50, after: 50 } }));
+        continue;
+      }
+      
+      if (trimmed.startsWith('# ')) {
+        paragraphs.push(new Paragraph({
+          text: trimmed.substring(2),
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 200, after: 200 }
+        }));
+      } else if (trimmed.startsWith('## ')) {
+        paragraphs.push(new Paragraph({
+          text: trimmed.substring(3),
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 150, after: 150 }
+        }));
+      } else if (trimmed.startsWith('### ')) {
+        paragraphs.push(new Paragraph({
+          text: trimmed.substring(4),
+          heading: HeadingLevel.HEADING_3,
+          spacing: { before: 120, after: 120 }
+        }));
+      } else {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun(line)],
+          spacing: { before: 50, after: 50 }
+        }));
+      }
+    }
+    
     const doc = new Document({
       sections: [{
         properties: {},
-        children: paragraphs.map(p => {
-          // Check if it's a heading (starts with #)
-          if (p.startsWith('# ')) {
-            return new Paragraph({
-              text: p.substring(2),
-              heading: HeadingLevel.HEADING_1,
-              spacing: { before: 200, after: 200 }
-            });
-          } else if (p.startsWith('## ')) {
-            return new Paragraph({
-              text: p.substring(3),
-              heading: HeadingLevel.HEADING_2,
-              spacing: { before: 150, after: 150 }
-            });
-          } else {
-            return new Paragraph({
-              children: [new TextRun(p)],
-              spacing: { before: 100, after: 100 }
-            });
-          }
-        })
+        children: paragraphs
       }]
     });
     
-    // Generate DOCX blob
     const blob = await Packer.toBlob(doc);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1331,41 +1384,55 @@ function backupToDrive(format) {
   
   status.textContent = `⏳ Backing up ${format.toUpperCase()} to Google Drive...`;
   
-  // For DOCX, use the docx library to generate proper file
   if (format === 'docx') {
     (async function() {
       try {
-        if (typeof docx === 'undefined') {
-          status.textContent = '❌ DOCX library is loading. Please try again.';
+        if (typeof docx === 'undefined' || !docx) {
+          status.textContent = '❌ DOCX library is still loading. Please try again.';
           return;
         }
         
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
-        const paragraphs = content.split('\n').filter(p => p.trim() !== '');
+        const lines = content.split('\n');
+        const paragraphs = [];
+        
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed === '') {
+            paragraphs.push(new Paragraph({ spacing: { before: 50, after: 50 } }));
+            continue;
+          }
+          
+          if (trimmed.startsWith('# ')) {
+            paragraphs.push(new Paragraph({
+              text: trimmed.substring(2),
+              heading: HeadingLevel.HEADING_1,
+              spacing: { before: 200, after: 200 }
+            }));
+          } else if (trimmed.startsWith('## ')) {
+            paragraphs.push(new Paragraph({
+              text: trimmed.substring(3),
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 150, after: 150 }
+            }));
+          } else if (trimmed.startsWith('### ')) {
+            paragraphs.push(new Paragraph({
+              text: trimmed.substring(4),
+              heading: HeadingLevel.HEADING_3,
+              spacing: { before: 120, after: 120 }
+            }));
+          } else {
+            paragraphs.push(new Paragraph({
+              children: [new TextRun(line)],
+              spacing: { before: 50, after: 50 }
+            }));
+          }
+        }
         
         const doc = new Document({
           sections: [{
             properties: {},
-            children: paragraphs.map(p => {
-              if (p.startsWith('# ')) {
-                return new Paragraph({
-                  text: p.substring(2),
-                  heading: HeadingLevel.HEADING_1,
-                  spacing: { before: 200, after: 200 }
-                });
-              } else if (p.startsWith('## ')) {
-                return new Paragraph({
-                  text: p.substring(3),
-                  heading: HeadingLevel.HEADING_2,
-                  spacing: { before: 150, after: 150 }
-                });
-              } else {
-                return new Paragraph({
-                  children: [new TextRun(p)],
-                  spacing: { before: 100, after: 100 }
-                });
-              }
-            })
+            children: paragraphs
           }]
         });
         
@@ -1395,7 +1462,6 @@ function backupToDrive(format) {
     return;
   }
   
-  // For TXT and MD, use simple blob upload
   const fileContent = getFileContent(format);
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify({ name: filename, mimeType: mimeType })], { type: 'application/json' }));
@@ -1478,17 +1544,8 @@ async function sendEmailDirect(event) {
   const message = document.getElementById('emailMessage').value;
   const format = pendingExportFormat || 'txt';
   
-  let body;
   const content = draft.value;
-  
-  if (format === 'txt' || format === 'md') {
-    body = `${message}\n\n---\n\n${content}`;
-  } else {
-    // For DOCX, we'll attach the file and send a message
-    // Since Gmail API doesn't support attachments easily in this flow,
-    // we'll send the plain text version with a note
-    body = `${message}\n\n---\n\n${content}\n\n(Note: Your manuscript was sent as plain text. For DOCX export, please use the File → Export → Local option.)`;
-  }
+  const body = `${message}\n\n---\n\n${content}`;
   
   const status = document.getElementById('emailStatus');
   status.textContent = '⏳ Sending email...';
@@ -1623,12 +1680,14 @@ if (draft) {
   draft.addEventListener('input', () => {
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(saveAllToLocal, 600);
+    updateStats();
   });
 }
 if (goalInput) {
   goalInput.addEventListener('input', () => {
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(saveAllToLocal, 600);
+    updateStats();
   });
 }
 
@@ -1662,7 +1721,6 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 // ---------- DIVIDER (static - no resize) ----------
-// The divider is now static. Left panel width is fixed at 32%.
 
 // ---------- KEYBOARD SHORTCUTS ----------
 document.addEventListener('keydown', (e) => {
@@ -1736,13 +1794,23 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
   document.getElementById('installBanner').style.display = 'none';
 }
 
+// ---------- CHECK DOCX LIBRARY ----------
+function checkDocxLibrary() {
+  if (typeof docx !== 'undefined' && docx) {
+    docxLibraryReady = true;
+  } else {
+    setTimeout(checkDocxLibrary, 1000);
+  }
+}
+
 // ---------- INITIALIZATION ----------
 function init() {
+  checkDocxLibrary();
+  
   loadSavedTheme();
   restoreFromLocal();
   updateStats();
   
-  // Google Sign-In
   setTimeout(() => {
     if (typeof google !== 'undefined') {
       initGoogleAuth();
@@ -1751,12 +1819,10 @@ function init() {
     }
   }, 500);
   
-  // Show install button if available
   if (deferredPrompt) {
     document.getElementById('installBtn').style.display = 'inline-block';
   }
   
-  // Hide splash after 3 seconds
   setTimeout(() => {
     if (splash && app) {
       splash.style.display = 'none';
