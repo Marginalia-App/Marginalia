@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Marginalia</title>
 
-  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f4ecd8">
   <link rel="icon" href="icon-192.png" sizes="any">
@@ -23,14 +22,9 @@
     }
   </script>
 
-  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  
-  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client"></script>
-
-  <!-- DOCX Library -->
   <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.min.js"></script>
 
   <style>
@@ -98,7 +92,7 @@
 
     @keyframes splashFadeIn {
       from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     :root {
@@ -466,7 +460,6 @@
       background: #388e3c;
     }
 
-    /* Responsive font sizes - BIGGER on smaller screens */
     @media (max-width: 768px) {
       #left {
         width: 100%;
@@ -532,7 +525,6 @@
 
 <body>
 
-<!-- SPLASH SCREEN -->
 <div id="splash">
   <img id="splashLogo" src="icon-192.png" srcset="icon-192.png 1x, icon-512.png 2x" alt="Marginalia logo">
   <h1>Marginalia</h1>
@@ -546,11 +538,9 @@
 
 <div id="app">
   <div id="toolbar">
-    <!-- File Menu -->
     <div class="group">
       <details>
         <summary>📁 File</summary>
-        
         <details>
           <summary>📥 Import</summary>
           <details>
@@ -564,7 +554,6 @@
             <button class="menu-button" onclick="importCards()">TXT / MD</button>
           </details>
         </details>
-
         <details>
           <summary>📤 Export</summary>
           <details>
@@ -585,7 +574,6 @@
             <button class="menu-button" onclick="exportDOCX()">💾 Word (DOCX)</button>
           </details>
         </details>
-
         <details>
           <summary>📦 Project</summary>
           <button class="menu-button" onclick="importProject()">📥 Import Project</button>
@@ -594,7 +582,6 @@
       </details>
     </div>
 
-    <!-- View Menu -->
     <div class="group">
       <details>
         <summary>👁️ View</summary>
@@ -604,7 +591,6 @@
       </details>
     </div>
 
-    <!-- Themes Menu -->
     <div class="group">
       <details>
         <summary>🎨 Themes</summary>
@@ -615,7 +601,6 @@
       </details>
     </div>
 
-    <!-- Help Menu -->
     <div class="group">
       <details>
         <summary>❓ Help</summary>
@@ -623,14 +608,15 @@
       </details>
     </div>
 
-    <!-- NEW BUTTON -->
     <div class="group">
       <button class="new-btn" onclick="newProject()">📄 New</button>
     </div>
 
-    <!-- SIGN IN BUTTON - THIS IS BACK! -->
+    <!-- SIGN IN BUTTON - FORCED TO SHOW -->
     <div class="group" style="border-right: none; flex: 1; justify-content: flex-end;">
-      <span id="googleUserStatus"></span>
+      <span id="googleUserStatus">
+        <button onclick="handleGoogleSignInClick()" class="sign-in-btn">🔑 Sign in with Google</button>
+      </span>
     </div>
   </div>
 
@@ -662,7 +648,6 @@
   </div>
 </div>
 
-<!-- Install Banner -->
 <div id="installBanner">
   <p style="margin:0 0 8px 0;font-weight:bold;">📱 Install Marginalia</p>
   <p style="margin:0 0 12px 0;font-size:0.9em;opacity:0.8;">Get the app on your home screen for offline access</p>
@@ -670,7 +655,6 @@
   <button onclick="dismissInstallBanner()">Not Now</button>
 </div>
 
-<!-- FAQ Modal -->
 <div id="faqModal" class="modal-overlay">
   <div class="modal-content">
     <h2>Marginalia - FAQ</h2>
@@ -688,12 +672,10 @@
   </div>
 </div>
 
-<!-- Google Drive Modal -->
 <div id="cloudModal" class="modal-overlay">
   <div class="modal-content">
     <h2>☁️ Google Drive</h2>
     <p>Connect to Google Drive to backup your manuscript.</p>
-    
     <div style="margin:15px 0;padding:15px;background:var(--bg);border-radius:4px;">
       <div id="driveStatus" style="margin-bottom:10px;">Sign in with Google to use Drive.</div>
       <div id="driveAuthContainer"></div>
@@ -703,26 +685,21 @@
         </button>
       </div>
     </div>
-    
     <div id="driveFileList" style="max-height:150px;overflow-y:auto;margin:10px 0;"></div>
-    
     <div style="text-align:right;margin-top:10px;">
       <button onclick="closeCloud()">Close</button>
     </div>
   </div>
 </div>
 
-<!-- Email Modal -->
 <div id="emailModal" class="modal-overlay">
   <div class="modal-content">
     <h2>📧 Send Email</h2>
     <p>Send your manuscript via Gmail directly through the app.</p>
-    
     <div style="margin:15px 0;padding:15px;background:var(--bg);border-radius:4px;">
       <div id="emailAuthStatus" style="margin-bottom:10px;">Sign in with Google to send emails.</div>
       <div id="emailAuthContainer"></div>
     </div>
-    
     <form id="emailForm" onsubmit="sendEmailDirect(event)" style="display:none;">
       <input type="email" id="emailTo" placeholder="Recipient email" required>
       <input type="text" id="emailSubject" placeholder="Subject" value="My Manuscript">
@@ -1254,24 +1231,6 @@ function importCards() {
 // EXPORT FUNCTIONS
 // ============================================================
 
-function getFileContent(format) {
-  return draft.value;
-}
-
-function getMimeType(format) {
-  if (format === 'txt') return 'text/plain';
-  if (format === 'md') return 'text/markdown';
-  if (format === 'docx') return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-  return 'text/plain';
-}
-
-function getFileExtension(format) {
-  if (format === 'txt') return '.txt';
-  if (format === 'md') return '.md';
-  if (format === 'docx') return '.docx';
-  return '.txt';
-}
-
 function exportTXT() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([draft.value]));
@@ -1362,8 +1321,8 @@ function backupToDrive(format) {
   
   const status = document.getElementById('driveStatus');
   const timestamp = new Date().toISOString().slice(0,10);
-  const filename = `manuscript_${timestamp}${getFileExtension(format)}`;
-  const mimeType = getMimeType(format);
+  const filename = `manuscript_${timestamp}.${format}`;
+  const mimeType = format === 'txt' ? 'text/plain' : format === 'md' ? 'text/markdown' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   
   status.textContent = `⏳ Backing up ${format.toUpperCase()} to Google Drive...`;
   
@@ -1522,7 +1481,6 @@ async function sendEmailDirect(event) {
   const to = document.getElementById('emailTo').value;
   const subject = document.getElementById('emailSubject').value;
   const message = document.getElementById('emailMessage').value;
-  const format = pendingExportFormat || 'txt';
   
   const body = `${message}\n\n---\n\n${draft.value}`;
   
@@ -1776,6 +1734,9 @@ function init() {
   loadSavedTheme();
   restoreFromLocal();
   updateStats();
+  
+  // FORCE sign-in button to show immediately
+  updateGoogleUI();
   
   setTimeout(() => {
     if (typeof google !== 'undefined') {
