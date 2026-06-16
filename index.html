@@ -30,7 +30,7 @@
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client"></script>
 
-  <!-- DOCX Library for proper Word export -->
+  <!-- DOCX Library -->
   <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.min.js"></script>
 
   <style>
@@ -46,7 +46,6 @@
       filter: drop-shadow(0 6px 18px rgba(0,0,0,.15));
     }
 
-    /* SPLASH SCREEN - ALWAYS PAPER DRAFT THEME */
     #splash {
       position: fixed;
       inset: 0;
@@ -102,7 +101,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* APP THEME - DEFAULT IS PAPER DRAFT */
     :root {
       --bg: #f4ecd8;
       --panel: #efe4ca;
@@ -468,7 +466,7 @@
       background: #388e3c;
     }
 
-    /* Responsive font sizes - BIGGER on smaller screens for readability */
+    /* Responsive font sizes - BIGGER on smaller screens */
     @media (max-width: 768px) {
       #left {
         width: 100%;
@@ -534,7 +532,7 @@
 
 <body>
 
-<!-- SPLASH SCREEN - ALWAYS PAPER DRAFT THEME -->
+<!-- SPLASH SCREEN -->
 <div id="splash">
   <img id="splashLogo" src="icon-192.png" srcset="icon-192.png 1x, icon-512.png 2x" alt="Marginalia logo">
   <h1>Marginalia</h1>
@@ -553,7 +551,6 @@
       <details>
         <summary>📁 File</summary>
         
-        <!-- Import Section -->
         <details>
           <summary>📥 Import</summary>
           <details>
@@ -568,7 +565,6 @@
           </details>
         </details>
 
-        <!-- Export Section -->
         <details>
           <summary>📤 Export</summary>
           <details>
@@ -590,7 +586,6 @@
           </details>
         </details>
 
-        <!-- Project Section -->
         <details>
           <summary>📦 Project</summary>
           <button class="menu-button" onclick="importProject()">📥 Import Project</button>
@@ -628,12 +623,12 @@
       </details>
     </div>
 
-    <!-- NEW BUTTON - GREEN -->
+    <!-- NEW BUTTON -->
     <div class="group">
       <button class="new-btn" onclick="newProject()">📄 New</button>
     </div>
 
-    <!-- Google Sign In / User Status -->
+    <!-- SIGN IN BUTTON - THIS IS BACK! -->
     <div class="group" style="border-right: none; flex: 1; justify-content: flex-end;">
       <span id="googleUserStatus"></span>
     </div>
@@ -751,7 +746,6 @@
 // ============================================================
 const GOOGLE_CLIENT_ID = '700935417544-7p8ni9dg4hgo3ce10eoat6ccv3e1pls6.apps.googleusercontent.com';
 
-// Scopes needed
 const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
 const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.send';
 
@@ -761,16 +755,13 @@ const GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.send';
 let cardsData = [];
 let sessionStart = 0;
 let draftHasChanged = false;
-let docxLibraryReady = false;
 
-// Google Auth state
 let googleUser = null;
 let googleToken = null;
 let driveToken = null;
 let gmailToken = null;
 let pendingExportFormat = null;
 
-// DOM elements
 const splash = document.getElementById('splash');
 const app = document.getElementById('app');
 const draft = document.getElementById('draft');
@@ -862,9 +853,7 @@ function highlightMatch(index) {
   const match = searchMatches[index];
   draft.focus();
   draft.setSelectionRange(match.start, match.end);
-  const lineHeight = 28;
-  const pos = Math.floor(match.start / 80) * lineHeight;
-  draft.scrollTop = pos;
+  draft.scrollTop = Math.floor(match.start / 80) * 28;
 }
 
 function findNext() {
@@ -956,7 +945,7 @@ function loadSavedTheme() {
   }
 }
 
-// ---------- NEW PROJECT (HARD RESET) ----------
+// ---------- NEW PROJECT ----------
 function newProject() {
   if (confirm('Start a new project? This will clear ALL current work including chapter cards.')) {
     cardsData = [];
@@ -1266,10 +1255,7 @@ function importCards() {
 // ============================================================
 
 function getFileContent(format) {
-  const content = draft.value;
-  if (format === 'txt') return content;
-  if (format === 'md') return content;
-  return content;
+  return draft.value;
 }
 
 function getMimeType(format) {
@@ -1303,8 +1289,6 @@ function exportMD() {
 }
 
 async function exportDOCX() {
-  const text = draft.value;
-  
   try {
     if (typeof docx === 'undefined' || !docx) {
       alert('DOCX library is still loading. Please wait a moment and try again.');
@@ -1313,7 +1297,7 @@ async function exportDOCX() {
     
     const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
     
-    const lines = text.split('\n');
+    const lines = draft.value.split('\n');
     const paragraphs = [];
     
     for (const line of lines) {
@@ -1377,7 +1361,6 @@ function backupToDrive(format) {
   }
   
   const status = document.getElementById('driveStatus');
-  const content = draft.value;
   const timestamp = new Date().toISOString().slice(0,10);
   const filename = `manuscript_${timestamp}${getFileExtension(format)}`;
   const mimeType = getMimeType(format);
@@ -1393,7 +1376,7 @@ function backupToDrive(format) {
         }
         
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
-        const lines = content.split('\n');
+        const lines = draft.value.split('\n');
         const paragraphs = [];
         
         for (const line of lines) {
@@ -1462,10 +1445,9 @@ function backupToDrive(format) {
     return;
   }
   
-  const fileContent = getFileContent(format);
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify({ name: filename, mimeType: mimeType })], { type: 'application/json' }));
-  form.append('file', new Blob([fileContent], { type: mimeType }));
+  form.append('file', new Blob([draft.value], { type: mimeType }));
   
   fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
     method: 'POST',
@@ -1514,9 +1496,7 @@ async function listDriveBackups() {
       div.textContent = `📄 ${file.name} (${new Date(file.createdTime).toLocaleString()})`;
       listDiv.appendChild(div);
     });
-  } catch (e) {
-    // Silent fail
-  }
+  } catch (e) {}
 }
 
 // ---------- EXPORT TO EMAIL ----------
@@ -1544,8 +1524,7 @@ async function sendEmailDirect(event) {
   const message = document.getElementById('emailMessage').value;
   const format = pendingExportFormat || 'txt';
   
-  const content = draft.value;
-  const body = `${message}\n\n---\n\n${content}`;
+  const body = `${message}\n\n---\n\n${draft.value}`;
   
   const status = document.getElementById('emailStatus');
   status.textContent = '⏳ Sending email...';
@@ -1720,8 +1699,6 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
-// ---------- DIVIDER (static - no resize) ----------
-
 // ---------- KEYBOARD SHORTCUTS ----------
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
@@ -1794,19 +1771,8 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
   document.getElementById('installBanner').style.display = 'none';
 }
 
-// ---------- CHECK DOCX LIBRARY ----------
-function checkDocxLibrary() {
-  if (typeof docx !== 'undefined' && docx) {
-    docxLibraryReady = true;
-  } else {
-    setTimeout(checkDocxLibrary, 1000);
-  }
-}
-
 // ---------- INITIALIZATION ----------
 function init() {
-  checkDocxLibrary();
-  
   loadSavedTheme();
   restoreFromLocal();
   updateStats();
