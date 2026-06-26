@@ -746,10 +746,6 @@ const quotes = [
   '"I write to find out what I did not know I knew."<br><br>— Robert Frost',
   '"I know nothing in the world that has as much power as a word. Sometimes I write one, and I look at it, until it begins to shine."<br><br>— Emily Dickinson'
 ];
-const quoteElement = document.getElementById('quote');
-if (quoteElement) {
-  quoteElement.innerHTML = quotes[Math.floor(Math.random() * quotes.length)];
-}
 
 // ---------- WORD COUNT ----------
 function getWordCount(text) {
@@ -1035,4 +1031,8 @@ function importFile(format, type) {
   const accepted = format === 'txt' ? '.txt' : '.md,.markdown';
   fileInput.accept = accepted;
   
-  fileInput.onchange =
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+   
