@@ -643,6 +643,7 @@ function setTheme(themeName) {
 
 function loadSavedTheme() {
   const savedTheme = localStorage.getItem('marginalia_theme');
+  // If there's a saved theme that's valid, use it
   if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink'].includes(savedTheme)) {
     setTheme(savedTheme);
   } else {
@@ -884,13 +885,15 @@ function restoreFromLocal() {
 }
 
 // ============================================================
-// CLOSE/REFRESH WARNING
+// CLOSE/REFRESH WARNING - FIXED
 // ============================================================
 window.addEventListener('beforeunload', function(e) {
+  // Only show warning if there's unsaved content
   if (draftHasChanged) {
+    // Standard way to trigger the browser's built-in warning
     e.preventDefault();
-    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-    return e.returnValue;
+    e.returnValue = '';
+    return '';
   }
 });
 
@@ -944,6 +947,7 @@ function installApp() {
 // INITIALIZATION
 // ============================================================
 function init() {
+  // Load theme - this will default to E-Ink if nothing is saved
   loadSavedTheme();
   restoreFromLocal();
   updateStats();
