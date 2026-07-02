@@ -643,11 +643,9 @@ function setTheme(themeName) {
 
 function loadSavedTheme() {
   const savedTheme = localStorage.getItem('marginalia_theme');
-  // If there's a saved theme that's valid, use it
   if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink'].includes(savedTheme)) {
     setTheme(savedTheme);
   } else {
-    // DEFAULT THEME: E-INK
     setTheme('E-Ink');
   }
 }
@@ -736,6 +734,8 @@ function exportTXT() {
   a.download = 'manuscript.txt';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 100);
+  // After exporting, mark changes as saved so the warning won't show
+  draftHasChanged = false;
 }
 
 function exportMD() {
@@ -744,6 +744,8 @@ function exportMD() {
   a.download = 'manuscript.md';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 100);
+  // After exporting, mark changes as saved so the warning won't show
+  draftHasChanged = false;
 }
 
 // ============================================================
@@ -762,6 +764,8 @@ function exportProject() {
   a.download = 'Marginalia_Project.json';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 100);
+  // After exporting, mark changes as saved so the warning won't show
+  draftHasChanged = false;
 }
 
 function importProject() {
@@ -779,7 +783,7 @@ function importProject() {
         draft.value = data.draft || '';
         goalInput.value = data.goal || 1000;
         sessionStart = getWordCount(draft.value);
-        draftHasChanged = true;
+        draftHasChanged = false; // Importing resets the change flag
         renderCards();
         updateStats();
         if (data.theme) setTheme(data.theme);
@@ -822,7 +826,7 @@ function newProject() {
     draft.value = '';
     goalInput.value = '1000';
     sessionStart = 0;
-    draftHasChanged = false;
+    draftHasChanged = false; // New project resets the change flag
     
     localStorage.clear();
     
@@ -885,12 +889,11 @@ function restoreFromLocal() {
 }
 
 // ============================================================
-// CLOSE/REFRESH WARNING - FIXED
+// CLOSE/REFRESH WARNING - ONLY IF CHANGES NOT SAVED
 // ============================================================
 window.addEventListener('beforeunload', function(e) {
   // Only show warning if there's unsaved content
   if (draftHasChanged) {
-    // Standard way to trigger the browser's built-in warning
     e.preventDefault();
     e.returnValue = '';
     return '';
@@ -947,7 +950,6 @@ function installApp() {
 // INITIALIZATION
 // ============================================================
 function init() {
-  // Load theme - this will default to E-Ink if nothing is saved
   loadSavedTheme();
   restoreFromLocal();
   updateStats();
@@ -958,11 +960,11 @@ function init() {
     document.getElementById('installBtn').textContent = '✅ Installed';
   }
   
-  // HIDE SPLASH - ALWAYS HAPPENS
+  // HIDE SPLASH AFTER 3.5 SECONDS
   setTimeout(function() {
     if (splash) splash.style.display = 'none';
     if (app) app.style.display = 'flex';
-  }, 3000);
+  }, 3500);
 }
 
 // Run init when page loads
