@@ -41,7 +41,7 @@
     #splash {
       position: fixed;
       inset: 0;
-      background: #f4ecd8;
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -56,18 +56,18 @@
     #splash h1 {
       font-size: 3em;
       margin: 0 0 .4em;
-      color: #222;
+      color: #000000;
     }
 
     #splash blockquote {
       max-width: 800px;
       font-size: 1.4em;
       line-height: 1.7;
-      color: #222;
+      color: #000000;
     }
 
     #splashTagline {
-      color: #8b6f47;
+      color: #000000;
       margin: 0 0 8px 0;
     }
 
@@ -75,13 +75,13 @@
       margin: 8px 0 0;
       font-size: 0.85em;
       opacity: 0.75;
-      color: #222;
+      color: #000000;
     }
 
     #splashCredit a {
-      color: #8b6f47;
+      color: #000000;
       text-decoration: none;
-      border-bottom: 1px dotted rgba(139,111,71,.6);
+      border-bottom: 1px dotted rgba(0,0,0,.6);
     }
 
     #splashCredit a:hover {
@@ -94,10 +94,10 @@
     }
 
     :root {
-      --bg: #f4ecd8;
-      --panel: #efe4ca;
-      --text: #222;
-      --accent: #8b6f47;
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --text: #000000;
+      --accent: #000000;
       --font-size: 1rem;
     }
 
@@ -123,7 +123,6 @@
       background: var(--panel);
       padding: 8px;
       flex-shrink: 0;
-      backdrop-filter: blur(10px);
     }
 
     #toolbar {
@@ -131,13 +130,14 @@
       gap: 12px;
       flex-wrap: wrap;
       align-items: center;
+      border-bottom: 1px solid #ddd;
     }
 
     .group {
       display: flex;
       gap: 4px;
       align-items: center;
-      border-right: 1px solid rgba(255,255,255,0.2);
+      border-right: 1px solid #ddd;
       padding-right: 10px;
     }
 
@@ -156,13 +156,11 @@
       width: 32%;
       background: var(--panel);
       overflow: auto;
-      backdrop-filter: blur(10px);
+      border-right: 1px solid #ddd;
     }
 
     #divider {
-      width: 6px;
-      background: var(--accent);
-      flex-shrink: 0;
+      display: none;
     }
 
     #right {
@@ -197,7 +195,7 @@
 
     details {
       margin: 4px 0;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid #ddd;
       padding: 4px 8px;
       border-radius: 4px;
     }
@@ -214,7 +212,7 @@
     details details {
       margin: 4px 0 4px 16px;
       border: none;
-      border-left: 2px solid rgba(255,255,255,0.2);
+      border-left: 2px solid #ddd;
       padding: 4px 8px;
     }
 
@@ -312,9 +310,8 @@
       max-height: 80vh;
       overflow: auto;
       padding: 20px;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid #ddd;
       border-radius: 8px;
-      backdrop-filter: blur(20px);
     }
 
     .modal-content a {
@@ -498,7 +495,6 @@
         <button class="menu-button" onclick="setTheme('Paper Draft')">📄 Paper Draft</button>
         <button class="menu-button" onclick="setTheme('Manuscript')">📖 Manuscript</button>
         <button class="menu-button" onclick="setTheme('E-Ink')">⚫ E-Ink</button>
-        <button class="menu-button" onclick="setTheme('Pride Rainbow')">🌈 Pride Rainbow</button>
       </details>
     </div>
 
@@ -540,9 +536,9 @@
     <h3>Features</h3>
     <details><summary><b>Import</b></summary><p>Import manuscript files (TXT, MD) or chapter cards (TXT, MD).</p></details>
     <details><summary><b>Export</b></summary><p>Export your manuscript locally as TXT or MD.</p></details>
-    <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, E-Ink, and Pride Rainbow modes.</p></details>
+    <details><summary><b>Themes</b></summary><p>Switch between Dark Draft, Paper Draft, Manuscript, and E-Ink modes.</p></details>
     
-    <p style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.2);">
+    <p style="margin-top:20px;padding-top:20px;border-top:1px solid #ddd;">
       <em>Marginalia is free and always will be. If it helped you finish a chapter, start a story, or spend a little more time writing than scrolling, and you'd like to support future development, feel free to reach out to the author.</em>
     </p>
     
@@ -635,25 +631,21 @@ function setTheme(themeName) {
     root.setProperty('--text', '#000');
     root.setProperty('--accent', '#666');
   } else if (themeName === 'E-Ink') {
-    root.setProperty('--bg', '#fff');
-    root.setProperty('--panel', '#fff');
-    root.setProperty('--text', '#000');
-    root.setProperty('--accent', '#000');
-  } else if (themeName === 'Pride Rainbow') {
-    root.setProperty('--bg', 'linear-gradient(135deg, #ffb3ba, #ffdfba, #ffffba, #baffc9, #bae1ff, #e8b4f8, #f8b4e8)');
-    root.setProperty('--panel', 'rgba(255,255,255,0.8)');
-    root.setProperty('--text', '#222');
-    root.setProperty('--accent', '#8b6f47');
+    root.setProperty('--bg', '#ffffff');
+    root.setProperty('--panel', '#ffffff');
+    root.setProperty('--text', '#000000');
+    root.setProperty('--accent', '#000000');
   }
   localStorage.setItem('marginalia_theme', themeName);
 }
 
 function loadSavedTheme() {
   const savedTheme = localStorage.getItem('marginalia_theme');
-  if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink', 'Pride Rainbow'].includes(savedTheme)) {
+  if (savedTheme && ['Dark Draft', 'Paper Draft', 'Manuscript', 'E-Ink'].includes(savedTheme)) {
     setTheme(savedTheme);
   } else {
-    setTheme('Paper Draft');
+    // DEFAULT THEME: E-INK
+    setTheme('E-Ink');
   }
 }
 
@@ -760,7 +752,7 @@ function exportProject() {
     cards: cardsData,
     draft: draft.value,
     goal: goalInput.value,
-    theme: localStorage.getItem('marginalia_theme') || 'Paper Draft'
+    theme: localStorage.getItem('marginalia_theme') || 'E-Ink'
   };
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)]));
@@ -831,7 +823,7 @@ function newProject() {
     
     localStorage.clear();
     
-    setTheme('Paper Draft');
+    setTheme('E-Ink');
     
     renderCards();
     updateStats();
@@ -853,14 +845,15 @@ function saveAllToLocal() {
 
 let autosaveTimer;
 if (draft) {
-  draft.addEventListener('input', () => {
+  draft.addEventListener('input', function() {
+    draftHasChanged = true;
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(saveAllToLocal, 600);
     updateStats();
   });
 }
 if (goalInput) {
-  goalInput.addEventListener('input', () => {
+  goalInput.addEventListener('input', function() {
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(saveAllToLocal, 600);
     updateStats();
@@ -888,31 +881,38 @@ function restoreFromLocal() {
   } catch (e) {}
 }
 
-// ---------- BEFOREUNLOAD ----------
-window.addEventListener('beforeunload', (e) => {
+// ============================================================
+// CLOSE/REFRESH WARNING
+// ============================================================
+window.addEventListener('beforeunload', function(e) {
   if (draftHasChanged) {
     e.preventDefault();
-    e.returnValue = '';
+    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+    return e.returnValue;
   }
 });
 
-// ---------- KEYBOARD SHORTCUTS ----------
-document.addEventListener('keydown', (e) => {
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     closeFAQ();
   }
 });
 
-// ---------- PWA INSTALLATION ----------
+// ============================================================
+// PWA INSTALLATION
+// ============================================================
 let deferredPrompt = null;
 
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   deferredPrompt = e;
   document.getElementById('installBtn').disabled = false;
 });
 
-window.addEventListener('appinstalled', () => {
+window.addEventListener('appinstalled', function() {
   document.getElementById('installBtn').disabled = true;
   document.getElementById('installBtn').textContent = '✅ Installed';
   deferredPrompt = null;
@@ -921,7 +921,7 @@ window.addEventListener('appinstalled', () => {
 function installApp() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
+    deferredPrompt.userChoice.then(function(choiceResult) {
       if (choiceResult.outcome === 'accepted') {
         document.getElementById('installBtn').disabled = true;
         document.getElementById('installBtn').textContent = '✅ Installed';
@@ -938,7 +938,9 @@ function installApp() {
   }
 }
 
-// ---------- INITIALIZATION ----------
+// ============================================================
+// INITIALIZATION
+// ============================================================
 function init() {
   loadSavedTheme();
   restoreFromLocal();
