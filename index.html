@@ -733,6 +733,7 @@ const totalSpan = document.getElementById('total');
 const cardsDiv = document.getElementById('cards');
 const leftPanel = document.getElementById('left');
 const divider = document.getElementById('divider');
+const quoteElement = document.getElementById('quote');
 
 // ---------- QUOTES ----------
 const quotes = [
@@ -838,42 +839,42 @@ function newProject() {
 // ============================================================
 
 function initGoogleAuth() {
-  if (typeof google === 'undefined') {
+  if (typeof google === 'undefined' || !google.accounts) {
     return;
   }
 
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleSignIn,
-    auto_select: false,
-    cancel_on_tap_outside: true
-  });
-
-  const driveContainer = document.getElementById('driveAuthContainer');
-  if (driveContainer) {
-    google.accounts.id.renderButton(driveContainer, {
-      type: 'standard',
-      theme: 'outline',
-      size: 'large',
-      text: 'signin_with',
-      shape: 'rectangular',
-      logo_alignment: 'left'
-    });
-  }
-
-  const emailContainer = document.getElementById('emailAuthContainer');
-  if (emailContainer) {
-    google.accounts.id.renderButton(emailContainer, {
-      type: 'standard',
-      theme: 'outline',
-      size: 'large',
-      text: 'signin_with',
-      shape: 'rectangular',
-      logo_alignment: 'left'
-    });
-  }
-
   try {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleSignIn,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+
+    const driveContainer = document.getElementById('driveAuthContainer');
+    if (driveContainer) {
+      google.accounts.id.renderButton(driveContainer, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        logo_alignment: 'left'
+      });
+    }
+
+    const emailContainer = document.getElementById('emailAuthContainer');
+    if (emailContainer) {
+      google.accounts.id.renderButton(emailContainer, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        logo_alignment: 'left'
+      });
+    }
+
     const savedUser = localStorage.getItem('marginalia_google_user');
     if (savedUser) {
       const userData = JSON.parse(savedUser);
@@ -882,7 +883,9 @@ function initGoogleAuth() {
       updateDriveUI();
       updateEmailUI();
     }
-  } catch (e) {}
+  } catch (e) {
+    // Silent fail - Google auth will retry on button click
+  }
 }
 
 function handleGoogleSignIn(response) {
@@ -935,8 +938,7 @@ async function getOAuthTokens() {
     updateEmailUI();
     
   } catch (error) {
-    document.getElementById('driveStatus').textContent = '❌ Failed to get Drive access. Please try again.';
-    document.getElementById('emailAuthStatus').textContent = '❌ Failed to get Gmail access. Please try again.';
+    // Silent fail - user can retry
   }
 }
 
@@ -1035,4 +1037,6 @@ function importFile(format, type) {
     const file = e.target.files[0];
     if (!file) return;
     
-   
+    const reader = new FileReader();
+    reader.onload = x => {
+      draft
